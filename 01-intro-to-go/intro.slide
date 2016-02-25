@@ -487,4 +487,9 @@ const (
 - Miscellany data structures (vector, set, etc)
 - Package manager
 
+* Working Example
+- See src/ipinfo.go
+
 * How Big Companies are Using Go
+
+* Q&A
