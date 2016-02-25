@@ -29,7 +29,7 @@ func main() {
 	for _, line := range strings.Split(string(body), "\n") {
 		v := strings.SplitN(string(line), ":", 2)
 		if len(v) > 1 {
-			vals[v[0]] = v[1]
+			vals[v[0]] = strings.TrimSpace(v[1])
 		}
 	}
 
