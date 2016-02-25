@@ -1,0 +1,19 @@
+var b bool = false 
+var s string = "" 
+var b byte = 0
+
+// -1 0
+int   uint   
+int8  uint8  
+int16 uint16 
+int32 uint32 
+int64 uint64 
+
+// 0.0  1.0i ...
+float32 complex64
+float64 complex128
+
+// 'c'
+rune
+
+uintptr
