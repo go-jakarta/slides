@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package helloworld;
+
 message HelloRequest {
   string greeting = 1;
 }

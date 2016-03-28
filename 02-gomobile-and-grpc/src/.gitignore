@@ -2,4 +2,4 @@ cmd/client/client
 cmd/server/server
 client
 server
-node_modules
+js/node_modules
