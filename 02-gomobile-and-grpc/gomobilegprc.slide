@@ -1,0 +1,66 @@
+Overview of Gomobile and GRPC
+GoJakarta Meetup - March 2016
+
+Kenneth Shaw
+ken@knq.io
+
+29 Mar 2016
+
+Tags: go, golang, gomobile, grpc, overview
+
+* GoJakarta Meetup Info
+- Thank you to [[http://www.gepi.co/][GEPI]] for hosting
+- GoJakarta is a new meetup focused on Golang, but will also incorporate other topics not directly related to Go such as deploying Go apps to the cloud
+- Slides available at [[https://github.com/kenshaw/go-jakarta][github.com/kenshaw/go-jakarta]]
+- Looking for someone (besides myself) who is also interested in doing a presentation!
+- Contact me [[mailto:ken@knq.io][ken@knq.io]] if you would like to do a presentation, or have a suggestion for a topic, or have a location
+- Next Meetup: April 21st, topic/location: TBD
+- After presentation: let's network and grab food/coffee/etc @ JJ Royal in Lotte Shopping Avenue downstairs
+
+* Gomobile
+- [[https://github.com/golang/go/wiki/Mobile][Gomobile]] is a tool for building and running mobile apps written in Go
+- Currently builds (and works well!) on iOS and Android
+- Possibly will be expanded to Windows Phones in the future
+- Allows for rapid cross-platform development and at native speed, interacting directly with Java or ObjC/Swift code
+- Installation:
+    go get -u golang.org/x/mobile/cmd/gomobile
+    gomobile init
+- Note: iOS can only be built from OS X, as Xcode is needed, and needs Go1.5+
+
+* GRPC
+- [[http://www.grpc.io/][GRPC]] is a high performance, next generation RPC framework designed and built by Google
+- Has bindings available for (almost) all programming languages
+- Built on top of HTTP/2 and was specifically designed to be highly performant on mobile networks
+- Messages are well defined through an IDL (Protocol Buffers), are binary (ie low-bandwidth), and support forwards/backwards compatibility
+- Extensions are available that will easily expose the RPC methods via JSON or other mechanisms
+- Perfect for building fast, native apps on mobile
+
+* Example
+- Simple GRPC service example:
+.code src/hello.proto
+
+* Protocol Buffers
+- RPC methods / types are defined via an interface description language (IDL), which for GRPC is Google's [[https://developers.google.com/protocol-buffers/docs/proto3][Protocol Buffers v3]] ("protobuf")
+- Unfortunately, must be manually installed:
+.code src/protobuf.sh
+
+* Protobuf Compilation
+- Definitions exist in `.proto` files and are compiled into service definitions using the `protoc` compiler:
+    protoc --go_out=plugins=grpc:. hello.proto
+- That will create a `hello.pb.go` file that contains all the Go code needed to interact with the GRPC service(s) defined in `hello.proto`
+
+* Using the Generated GRPC Services
+.code src/cmd/server/server.go /\/\/ import/,/^\)/
+
+* A Simple Go Server Example
+.code src/cmd/server/server.go /^type HelloServer/,/^}/
+
+* A Simple Go Server Example (cont'd)
+.code src/cmd/server/server.go /^func main/,/^}/
+
+* A Simple Go Client Example
+.code src/cmd/client/client.go /^func main/,/^}/
+
+* Let's eat! 
+- Meet downstairs in 15 minutes
+- JJ Royal @ Lotte Shopping Avenue
