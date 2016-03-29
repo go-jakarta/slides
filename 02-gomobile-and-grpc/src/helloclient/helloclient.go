@@ -1,9 +1,13 @@
 package helloclient
 
 import (
-	pb "github.com/kenshaw/go-jakarta/02-gomobile-and-grpc/src"
+	"errors"
+	"time"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+
+	pb "github.com/kenshaw/go-jakarta/02-gomobile-and-grpc/src"
 )
 
 // A wrapper type to expose via gomobile.
@@ -17,7 +21,7 @@ func New(addr string) (*HelloClient, error) {
 	var err error
 
 	// create connection
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithTimeout(10*time.Second))
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +38,11 @@ func (hc *HelloClient) SayHello(s string) (string, error) {
 	// create request
 	req := &pb.HelloRequest{Greeting: s}
 
+	// some safety checking
+	if hc.conn == nil || hc.client == nil {
+		return "", errors.New("unable to SayHello")
+	}
+
 	// call method
 	res, err := hc.client.SayHello(context.Background(), req)
 	if err != nil {
@@ -45,5 +54,8 @@ func (hc *HelloClient) SayHello(s string) (string, error) {
 
 // Shutdown closes connections.
 func (hc *HelloClient) Shutdown() error {
-	return hc.conn.Close()
+	if hc.conn != nil {
+		return hc.conn.Close()
+	}
+	return nil
 }
