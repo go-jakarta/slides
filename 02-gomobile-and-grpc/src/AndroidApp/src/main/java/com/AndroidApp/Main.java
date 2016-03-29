@@ -6,9 +6,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.view.View;
 
+// IMPORT OMIT
 import go.helloclient.Helloclient;
 import go.helloclient.Helloclient.HelloClient;
-
+// END OMIT
 
 public class Main extends Activity {
     private static final String addr = "192.168.1.5:8833";
@@ -23,6 +24,7 @@ public class Main extends Activity {
         final TextView textView = (TextView) findViewById(R.id.result);
         final StringBuilder sb = new StringBuilder("");
 
+// CLICK OMIT
         // add click listener
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -49,5 +51,6 @@ public class Main extends Activity {
                 }
             }
         });
+// END OMIT
     }
 }

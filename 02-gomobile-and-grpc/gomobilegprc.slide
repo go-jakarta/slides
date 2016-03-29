@@ -54,19 +54,22 @@ Tags: go, golang, gomobile, grpc, overview
 - Very easy to write extension if needed
 
 * Using the Generated GRPC Services
+- In Go, simply import the generated package:
 .code src/cmd/server/server.go /\/\/ import/,/^\)/
 
 * A Simple Go Server Example
+- Create a type (ie, `HelloServer`) and make sure it conforms with the service `interface` defined in the `hello.pb.go`:
 .code src/cmd/server/server.go /^type HelloServer/,/^}/
 
 * A Simple Go Server Example (cont'd)
+- Then run the service:
 .code src/cmd/server/server.go /^func main/,/^}/
 
 * A Simple Go Client Example
 .code src/cmd/client/client.go /^func main/,/^}/
 
 * Other Notes on GRPC
-- Protobuf also supports annotations in `proto` files: 
+- Protobuf also supports annotations ("options") in `proto` files: 
 .code src/profile.proto /^service ProfileService/,/^}/
 
 * Other Notes on GRPC (cont'd)
@@ -74,6 +77,52 @@ Tags: go, golang, gomobile, grpc, overview
 - [[https://github.com/gengo/grpc-gateway][grpc-gateway]] provides a simple way to generate JSON->GRPC Go API calls for backwards compatability
 - Google internally uses a similar approach for its APIs
 - Streaming is really really cool, but we don't have enough time to cover it tonight
+
+* Gomobile
+- [[https://github.com/golang/go/wiki/Mobile][Gomobile]] is a tool for building and running mobile apps written in Go
+- Currently builds (and works well!) on iOS and Android
+- Possibly will be expanded to Windows Phones in the future
+- Allows for rapid cross-platform development and at native speed, interacting directly with Java or ObjC/Swift code
+- Installation:
+    go get -u golang.org/x/mobile/cmd/gomobile
+    gomobile init
+- Note: needs Go1.5+; also iOS can only be built from OS X, as Xcode is needed
+
+* Using Go Code in Mobile App
+- Two step process
+- Write Go code that that conforms to the supported export types of Gomobile, and write Java/ObjC code to interact with it
+- Use '`gomobile bind`' to generate native code:
+    gomobile bind -target android github.com/kenshaw/go-jakarta/02-gomobile-and-grpc/src/helloclient
+    gomobile bind -target ios github.com/kenshaw/go-jakarta/02-gomobile-and-grpc/src/helloclient
+- That's it!
+
+* Example GRPC Code Used with Gomobile
+.code src/helloclient/helloclient.go /^\/\/ A wrapper/,/^}/
+.code src/helloclient/helloclient.go /^\/\/ New/,/^}/
+
+* Example GRPC Code Used with Gomobile (cont'd)
+.code src/helloclient/helloclient.go /^\/\/ New/,/^}/
+
+* Linking Go code with Android code
+- Use the Gradle Android `gobind` plugin
+- Create `AndroidApp/helloclient/build.gradle`
+.code src/AndroidApp/helloclient/build.gradle
+
+* Linking Go code with Android code (cont'd)
+- Add project dir to `AndroidApp/settings.gradle`:
+.code src/AndroidApp/settings.gradle
+- In `AndroidApp/build.gradle`, add:
+.code src/AndroidApp/build.gradle /^dependencies/,/^}/
+
+* Importing Go code to Java/Android 
+- Import the generated package:
+.code src/AndroidApp/src/main/java/com/AndroidApp/Main.java /^\/\/ IMPORT/,/^\/\/ END/
+- Note: Sorry! -- this is bad naming on my part!
+
+* Calling Go code from Java/Android
+.code src/AndroidApp/src/main/java/com/AndroidApp/Main.java /^\/\/ CLICK/,/^\/\/ END/
+
+* Demo: App in Action
 
 * Let's eat! 
 - Meet downstairs in 15 minutes
