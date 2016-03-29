@@ -61,7 +61,7 @@ func (*IDMessage) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1
 
 type ProfileMessage struct {
 	Id          string                     `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	ProfileType ProfileMessage_ProfileType `protobuf:"varint,2,opt,name=profile_type,enum=helloworld.ProfileMessage_ProfileType" json:"profile_type,omitempty"`
+	ProfileType ProfileMessage_ProfileType `protobuf:"varint,2,opt,name=profile_type,json=profileType,enum=helloworld.ProfileMessage_ProfileType" json:"profile_type,omitempty"`
 	Name        string                     `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
 }
 
@@ -80,6 +80,10 @@ func init() {
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
 var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion1
 
 // Client API for ProfileService service
 

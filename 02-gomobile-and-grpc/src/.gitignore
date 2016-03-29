@@ -3,3 +3,5 @@ cmd/server/server
 client
 server
 js/node_modules
+*.framework
+*.aar
