@@ -25,15 +25,16 @@ Tags: go, golang, gomobile, grpc, overview
 - Installation:
     go get -u golang.org/x/mobile/cmd/gomobile
     gomobile init
-- Note: iOS can only be built from OS X, as Xcode is needed, and needs Go1.5+
+- Note: needs Go1.5+; also iOS can only be built from OS X, as Xcode is needed
 
 * GRPC
 - [[http://www.grpc.io/][GRPC]] is a high performance, next generation RPC framework designed and built by Google
 - Has bindings available for (almost) all programming languages
 - Built on top of HTTP/2 and was specifically designed to be highly performant on mobile networks
-- Messages are well defined through an IDL (Protocol Buffers), are binary (ie low-bandwidth), and support forwards/backwards compatibility
+- Is bi-directional and supports streaming API calls
+- Messages are well defined through an IDL (Protocol Buffers), are binary and compressed (ie low-bandwidth), and support forwards/backwards compatibility
 - Extensions are available that will easily expose the RPC methods via JSON or other mechanisms
-- Perfect for building fast, native apps on mobile
+- Perfect for building fast/efficient/secure APIs for mobile apps
 
 * Example
 - Simple GRPC service example:
@@ -43,11 +44,14 @@ Tags: go, golang, gomobile, grpc, overview
 - RPC methods / types are defined via an interface description language (IDL), which for GRPC is Google's [[https://developers.google.com/protocol-buffers/docs/proto3][Protocol Buffers v3]] ("protobuf")
 - Unfortunately, must be manually installed:
 .code src/protobuf.sh
+- Protobuf syntax is like a mini-programming language, supports things such as ENUMs, custom types, etc.
 
-* Protobuf Compilation
-- Definitions exist in `.proto` files and are compiled into service definitions using the `protoc` compiler:
+* Working with Protocol Buffers
+- Service and Message definitions are defined in `.proto` files and are compiled into the target language code using the `protoc` compiler:
     protoc --go_out=plugins=grpc:. hello.proto
 - That will create a `hello.pb.go` file that contains all the Go code needed to interact with the GRPC service(s) defined in `hello.proto`
+- Various plugins exist for the `protoc` compiler that provide extensions such as compiling JSON support for a target language, etc.
+- Very easy to write extension if needed
 
 * Using the Generated GRPC Services
 .code src/cmd/server/server.go /\/\/ import/,/^\)/
@@ -60,6 +64,16 @@ Tags: go, golang, gomobile, grpc, overview
 
 * A Simple Go Client Example
 .code src/cmd/client/client.go /^func main/,/^}/
+
+* Other Notes on GRPC
+- Protobuf also supports annotations in `proto` files: 
+.code src/profile.proto /^service ProfileService/,/^}/
+
+* Other Notes on GRPC (cont'd)
+- Annotations can be used with other tools, such as [[https://github.com/gogo/letmegrpc][gogo letmegrpc]] (web form generator)
+- [[https://github.com/gengo/grpc-gateway][grpc-gateway]] provides a simple way to generate JSON->GRPC Go API calls for backwards compatability
+- Google internally uses a similar approach for its APIs
+- Streaming is really really cool, but we don't have enough time to cover it tonight
 
 * Let's eat! 
 - Meet downstairs in 15 minutes
