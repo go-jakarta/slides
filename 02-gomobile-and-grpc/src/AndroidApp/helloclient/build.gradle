@@ -1,0 +1,8 @@
+plugins {
+  id 'org.golang.mobile.bind' version '0.2.4'
+}
+
+gobind {
+  GOPATH = System.getenv('GOPATH')
+  pkg = 'github.com/kenshaw/go-jakarta/02-gomobile-and-grpc/src/helloclient'
+}
