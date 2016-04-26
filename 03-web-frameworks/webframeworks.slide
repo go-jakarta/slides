@@ -1,0 +1,122 @@
+Building Large Scale Web Applications in Go
+GoJakarta Meetup - April 2016
+
+Kenneth Shaw
+ken@knq.io
+
+26 Apr 2016
+
+Tags: go, golang, net/http, middleware, echo, gin, framework
+
+* GoJakarta Meetup Info
+- Thank you to [[http://east.vc][EVHive]] for hosting
+- GoJakarta is a new meetup focused on Golang, but will also incorporate other topics indirectly related to Go such as deploying Go apps to the cloud
+- Slides available at [[https://github.com/kenshaw/go-jakarta][github.com/kenshaw/go-jakarta]]
+- Looking for someone (besides myself) who is also interested in doing a presentation!
+- Contact me [[mailto:ken@knq.io][ken@knq.io]] if you would like to do a presentation, have a suggestion for a topic, or have a suggestion for a location!
+- Next Meetup: most likely May 26th, topic/location: TBD
+- After presentation: let's network and grab food/coffee/etc @ Camden
+
+* Quick Annoucements
+- Go 1.6.2 is now out, so upgrade! (includes two security fixes)
+.code src/upgrade.sh
+
+* What is Scaling?
+- "Scaling" can refer to a variety of things:
+1. Scaling users
+2. Scaling development team size
+3. Scaling code size/features (usually related to scaling #2)
+4. Scaling performance (ie, more users per node)
+
+* Typical Web App Architecture
+.image images/slide1.png
+
+* Modern Web App Architecture
+.image images/slide2.png
+
+* Large Scale Web App Architecture
+.image images/slide3.png
+
+* Basic Go Web App
+.code src/simple.go
+
+* Standard Library
+- The standard library `net/http` makes heavy use of the `Handler` interface:
+.code src/handler.go /^type/,/^}/
+- Any type satisfying the `Handler` interface can be used anywhere that is expecting "standard" middleware:
+.code src/counter.go /^\/\/ START/,/^\/\/ END/
+
+* Standard Library (cont'd)
+- The standard library is very powerful, and has a lot of built in features, which is why most middleware/frameworks build off the standard library
+- For example, `net/http` has built in support for TLS, HTTP/2, etc:
+.code src/tlssimple.go
+
+* Example Logger Middleware
+- By chaining `ServeHTTP` calls, you can create reusable middleware:
+.code src/logger.go /^\/\/ LOGGER/,/^\/\/ END/
+
+* Example Logger Middleware (cont'd)
+.code src/logger.go /^\/\/ MAIN/,/^\/\/ END/
+
+* Handling URL Paths with the Standard Library
+- `net/http` uses a technique called "multiplexing" to combine multiple `http.Handler` 's into a single web server:
+.code src/multiplex.go /^func main/,/^}/
+- It's important to note that any `ServeMux` can handle any number of nested mux'ers, middleware chains, etc.
+
+* About Middleware / Frameworks
+- In fact, most frameworks use some kind (but way more advanced!) variation on this pattern, by building off of `net/http` and providing a simplified way chain "standard" middleware in their implementations
+- By combining things such as `panic` / `recover`, Goroutines, channels, and the other features of the Go language, you can create very powerful, very fast, highly resilient web apps that are still easy to write code for, easy to understand, and easy to deploy!
+
+* Popular Frameworks in Go
+- [[http://www.gorillatoolkit.org/][Gorilla]] - one of the oldest and well established Go web packages around, it is a powerful toolkit that provides a simple API around common tasks for working with the standard `net/http` package
+- [[https://github.com/gin-gonic/gin][Gin]] - a fast, lightweight framework featuring a [[https://github.com/go-martini/martini][Martini]]/Sinatra-like API
+- [[https://github.com/labstack/echo][Echo]] - relatively new, but up-and-coming framework that provides more advanced features for building complex apps
+- [[https://github.com/goji/goji][Goji]] - A minimal, flexible, and fast request multiplexer, useful for rapidly building complicated, custom systems on top of the standard library
+
+* Useful Helpers in the Standard Library
+- `net/http` has some standard utilities that make things like serving static files easy
+- `html/template` provides a great way for creating (simple) page templates
+
+* Basic Go Example
+.code src/basic.go /\/\/ MUX/,/\/\/ END/
+
+* Basic Go Example (cont'd)
+.code src/basic.go /^func index/,/^}/
+
+* Basic Go Example (cont'd)
+.code src/basic.go /^func writeJSON/,/^}/
+
+* Basic Go Example (cont'd)
+.code src/basic.go /^func listAuthors/,/^}/
+
+* Basic Go Example (cont'd)
+.code src/basic.go /^func addAuthor/,/^}/
+
+* Gorilla
+- Since it is a toolkit, here's an overview of the packages included with it:
+  gorilla/context - stores global request variables.
+  gorilla/mux - is a powerful URL router and dispatcher.
+  gorilla/reverse - produces reversible regular expressions for regexp-based muxes.
+  gorilla/rpc - implements RPC over HTTP with codec for JSON-RPC.
+  gorilla/schema - converts form values to a struct.
+  gorilla/securecookie - encodes and decodes authenticated and optionally encrypted cookie values.
+  gorilla/sessions - saves cookie and filesystem sessions and allows custom session backends.
+  gorilla/websocket - implements the WebSocket protocol defined in RFC 6455.
+
+* Gin Example
+
+
+* Echo Example
+
+* Goji Example
+
+* Scaling
+
+* Typical Web App Architecture
+.image images/slide1.png
+
+* Modern Web App Architecture
+.image images/slide2.png
+
+* Large Scale Web App Architecture
+.image images/slide3.png
