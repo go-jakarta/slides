@@ -8,6 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/kenshaw/go-jakarta/03-web-frameworks/src/models"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/engine/standard"
+	"github.com/labstack/echo/middleware"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -28,31 +31,33 @@ func init() {
 }
 
 func main() {
-	r := gin.Default()
-	r.GET("/hello/:name", func(c *gin.Context) {
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.GET("/hello/:name", func(c echo.Context) error {
 		name := c.Param("name")
-		c.String(http.StatusOK, "hello %s", name)
+		return c.String(http.StatusOK, fmt.Sprintf("hello %s", name))
 	})
 
-	r.GET("/authors", func(c *gin.Context) {
+	e.GET("/authors", func(c echo.Context) error {
 		// get authors
 		authors, err := models.GetAuthors(db)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			return c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
-			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		return c.JSON(http.StatusOK, gin.H{
 			"authors": authors,
 		})
 	})
 
 	// SPLIT OMIT
 
-	r.POST("/add", func(c *gin.Context) {
-		name := c.PostForm("name")
+	e.POST("/add", func(c echo.Context) error {
+		name := c.FormValue("name")
 		author := &models.Author{
 			Name: name,
 		}
@@ -60,18 +65,17 @@ func main() {
 		// save to database
 		err := author.Save(db)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			return c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
-			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		return c.JSON(http.StatusOK, gin.H{
 			"id": author.AuthorID,
 		})
 	})
 
-	r.Static("/static", "static")
+	e.Static("/static", "static")
 
-	r.Run(":8000")
+	e.Run(standard.New(":8000"))
 }

@@ -21,22 +21,6 @@ Tags: go, golang, net/http, middleware, echo, gin, framework
 - Go 1.6.2 is now out, so upgrade! (includes two security fixes)
 .code src/upgrade.sh
 
-* What is Scaling?
-- "Scaling" can refer to a variety of things:
-1. Scaling users
-2. Scaling development team size
-3. Scaling code size/features (usually related to scaling #2)
-4. Scaling performance (ie, more users per node)
-
-* Typical Web App Architecture
-.image images/slide1.png
-
-* Modern Web App Architecture
-.image images/slide2.png
-
-* Large Scale Web App Architecture
-.image images/slide3.png
-
 * Basic Go Web App
 .code src/simple.go
 
@@ -69,6 +53,7 @@ Tags: go, golang, net/http, middleware, echo, gin, framework
 
 * Popular Frameworks in Go
 - [[http://www.gorillatoolkit.org/][Gorilla]] - one of the oldest and well established Go web packages around, it is a powerful toolkit that provides a simple API around common tasks for working with the standard `net/http` package
+- [[https://github.com/revel/revel][Revel]] - a comprehensive framework providing similar features to Rails, Symfony2, etc.
 - [[https://github.com/gin-gonic/gin][Gin]] - a fast, lightweight framework featuring a [[https://github.com/go-martini/martini][Martini]]/Sinatra-like API
 - [[https://github.com/labstack/echo][Echo]] - relatively new, but up-and-coming framework that provides more advanced features for building complex apps
 - [[https://github.com/goji/goji][Goji]] - A minimal, flexible, and fast request multiplexer, useful for rapidly building complicated, custom systems on top of the standard library
@@ -81,10 +66,10 @@ Tags: go, golang, net/http, middleware, echo, gin, framework
 .code src/basic.go /\/\/ MUX/,/\/\/ END/
 
 * Basic Go Example (cont'd)
-.code src/basic.go /^func index/,/^}/
+.code src/basic.go /^func writeJSON/,/^}/
 
 * Basic Go Example (cont'd)
-.code src/basic.go /^func writeJSON/,/^}/
+.code src/basic.go /^func index/,/^}/
 
 * Basic Go Example (cont'd)
 .code src/basic.go /^func listAuthors/,/^}/
@@ -103,14 +88,52 @@ Tags: go, golang, net/http, middleware, echo, gin, framework
   gorilla/sessions - saves cookie and filesystem sessions and allows custom session backends.
   gorilla/websocket - implements the WebSocket protocol defined in RFC 6455.
 
-* Gin Example
+* Revel
+- Too complicated to go over just tonight
+- Provides "out of the box" support for routes, templates, controllers, etc.
+- Workflow likely more familiar to Ruby on Rails, Symfony2, Django, etc. developers
+- Lots of "magic"
+.code src/revel.sh
 
+* Revel Chat App Demo
+.code src/chat.sh
+
+* Gin Example
+.code src/gin.go /^func main/,/\/\/ SPLIT/
+
+* Gin Example (cont'd)
+.code src/gin.go /\/\/ SPLIT/,/^}/
 
 * Echo Example
+.code src/echo.go /^func main/,/\/\/ SPLIT/
+
+* Echo Example (cont'd)
+.code src/echo.go /\/\/ SPLIT/,/^}/
 
 * Goji Example
+.code src/goji.go /^func main/,/\/\/ SPLIT/
+
+* Goji Example (cont'd)
+.code src/goji.go /\/\/ SPLIT/,/^}/
+
+* Middleware
+- [[https://github.com/rs/cors][rs/cors]] - add CORS headers
+- [[https://github.com/ulule/limiter][ulule/limiter]] - rate limiting
+- [[https://github.com/unrolled/secure][unrolled/secure]] - common sense security settings
+- Session implementations for every kind of database/caching layer in existence - check to see what is compatible with your framework/library/toolkit of choice!
+- Various logging/analytics middleware for service providers (Datadog, Keen.io, Airbrake, NewRelic, etc) - chances are whatever service you use, there is already a middleware implementation available today 
+- Authentication implementations for JWT/OAuth/etc
+- "Flash bags" and other UI oriented middlewares
+- And more and more and more!
 
 * Scaling
+
+* What is Scaling?
+- "Scaling" can refer to a variety of things:
+1. Scaling users
+2. Scaling development team size
+3. Scaling code size/features (usually related to scaling #2)
+4. Scaling performance (ie, more users per node)
 
 * Typical Web App Architecture
 .image images/slide1.png
@@ -120,3 +143,14 @@ Tags: go, golang, net/http, middleware, echo, gin, framework
 
 * Large Scale Web App Architecture
 .image images/slide3.png
+
+* Techniques for Scaling with Go
+- Split up tiers between views and business logic
+- Use [[https://github.com/golang/groupcache][groupcache]] in place of `memcache` or equivalents
+- Offload assets to CDN/caching layer
+- Try to stay away from ORMs
+- Terminate TLS at Load Balancer
+- Separate queue workers from application servers
+
+* Let's eat!
+- Meet at Camden Restaurant in 20 minutes
