@@ -1,0 +1,170 @@
+Building for the Cloud with Go
+GoJakarta Meetup - September 2016
+
+Kenneth Shaw
+ken@brank.as
+
+29 Sep 2016
+
+Tags: go, golang, cloud, architecture, gcp, aws, digitalocean, azure
+
+* GoJakarta Meetup Info
+- Thank you to [[http://east.vc][EVHive]] for hosting!
+- GoJakarta is a monthly meetup focused on Golang, but will also incorporate other topics indirectly related to Go such as deploying Go apps to the cloud
+- Looking for presenters! We need presenters! Please!
+- Contact me [[mailto:ken@brank.as][ken@brank.as]] if you would like to do a presentation, have a suggestion for a topic, or have a suggestion for a location!
+- Slides available at [[https://github.com/kenshaw/go-jakarta][github.com/kenshaw/go-jakarta]]
+- Next Meetup: most likely October 27th, topic/location: TBD
+- After presentation: let's network and talk
+
+* Quick Annoucements
+- Go 1.7.1 is now out, so upgrade! Big performance gains on compilation and code size with introduction of SSA
+.code src/upgrade.sh
+
+* Building for the Cloud with Go
+- What exactly constitutes the "cloud?"
+- What characteristics do cloud apps have and what is the best design (architecture) for the cloud?
+- An examination of the APIs / packages available for Go
+- How does one best leverage Go for the cloud?
+- What are the tradeoffs with Go?
+- Balancing costs and other factors for Go and the cloud
+
+* What is the Cloud?
+- Cloud has become a euphemism for any 3rd-party service provider that has "instant" provisioning of computing resources (CPU, storage, networking, etc)
+- It is mostly synonymous with the large cloud companies providing, in addition to basic computing resources, higher-level managed services such as databases (RDS/BigQuery/etc), queues/messaging (Pub-Sub/SQS), fully managed scaling platforms (GAE/Beanstalk), and other value added services - notably, Amazon Web Services (AWS), Microsoft Azure, and Google Cloud Platform (GCP)
+- Also refers to a number of smaller providers that focus on a specific niche or resource type, such as DigitalOcean (VMs) or Heroku (PaaS)
+
+* Apps built for the Cloud should be:
+- Composable
+- Concurrent
+- Atomic
+- Stateless
+- Disposable
+
+* Structuring Go apps for the Cloud
+- Treat everything "-as-a-Service" and ensure each tier/segment/component is horizontally scalable
+- When you can, use third-party services
+- When you can't, wrap your component in an API (ie, "microservice") and roll your own
+- Language features of Go means it is trivial to make processes [[https://blog.golang.org/concurrency-is-not-parallelism][concurrent]]
+- Leverage third-party packages such as [[https://www.grpc.io/][gRPC]] to make components reusable, composable, atomic parts
+
+* Stateless and Disposable Go Apps
+- Easy to encode state in a secure, non-tamperable way such as through encrypted tokens - plug! - [[https://github.com/knq/jwt][github.com/knq/jwt]]
+- If storing state in tokens is not an option, then use encrypted identifier and keep state in Redis/memcache/elsewhere
+- Apps should "spool" (ie, queue) backend requests and retry / rewrite, but should return control immediately
+- Monitoring becomes very important; make sure every aspect of your app has been instrumented and create metrics / counters for "everything"
+- After everything has metrics, make sure to configure auto-scaling groups appropriately
+- Store binary objects ("blobs") in appropriate places (ie, S3, CDNs, etc)
+
+* Architecture
+
+* Conventional Application
+.image images/conventional.png
+
+* Scalable Application
+.image images/scalable.png
+
+* Doing it with Go
+
+* Middleware and Context
+- Context is your friend 
+- Add values to context via middleware
+.code src/context.go /^func myMiddleware/,/^}/
+
+- Pull values out of context in handlers
+.code src/context.go /^func myHandler/,/^}/
+
+* State in Go
+- Stateless: [[https://github.com/knq/jwt][jwt]]
+.code src/context.go /^var signer/,/^}/
+Soon: I'm open sourcing a binary token library that will allow you to encode
+your own set of binary data in a token using gogoprotobuf (or any other
+serialization mechanism)
+
+- Cloud Providers: Amazon ElastiCache/RDS, Azure Redis Cache
+
+- Roll-your-own: Groupcache
+
+* Redis
+- Simple data structure store, usable as cache, queue, etc
+.code src/context.go /^func redisExample/,/^}/
+
+* Memcached
+- Distributed memory object cache
+.code src/context.go /^func memcacheExample/,/^}/
+
+* Groupcache
+- Unique to Go, built by Brad Fitzpatrick, on Go team @ Google and originally behind Memcached
+- More difficult to use than Redis/Memcached, but better!
+.code src/context.go /^func groupcacheExample/,/^}/
+
+* Database
+- Cloud Providers: Google Big Query/Cloud SQL, Amazon RDS, and many others
+- Roll-your-own: almost any database that exists
+
+* SQL
+- Go has great SQL support (PostgreSQL, MySQL, Oracle, Microsoft SQL Server, etc)
+- You don't need to use an ORM if you write your SQL properly! plug: [[https://github.com/knq/xo][github.com/knq/xo]]
+.code src/context.go /^func sqlExample/,/^}/
+
+* Google BigQuery
+.code src/context.go /^func bigqueryExample/,/^}/
+
+* Queues
+- Cloud Providers: Amazon SQS, Google Pub/Sub, Amazon RDS Redis
+- Roll-your-own: Redis, many, many others
+
+* Amazon SQS
+.code src/context.go /^func sqsExample/,/^}/
+
+* Pubsub
+.code src/context.go /^func pubsubExample/,/^}/
+
+* Messaging
+- Cloud Providers: Amazon SES, Firebase Cloud Messaging
+- Roll-your-own: Postfix, others
+
+* Amazon SES
+.code src/context.go /^func sesExample/,/^}/
+
+* Firebase Cloud Messaging (FCM)
+.code src/context.go /^func fcmExample/,/^}/
+
+* Binary File Storage (BLOBs)
+- Services: Amazon S3, Google Cloud Storage, Azure Storage
+- Roll-your-own: Don't. Seriously, don't.
+
+* Amazon S3
+.code src/context.go /^func s3Example/,/^}/
+
+* Monitoring / Logging
+- Services: Many many many different providers -- choose one that fits your cost structure
+- Roll-your-own: you can, but it won't play nicely with others, won't be feature complete, won't be fast, and not likely to be stable
+- You should use a higher level logging / monitoring solution that provides leveled logs and metadata (zap, Logrus, glog, or otherwise)
+
+* Logrus Hooks
+- Google Stackdriver is free (for now)
+- Plug! new open source Logrus hook for Stackdriver: [[https://github.com/knq/sdhook][github.com/knq/sdhook]]
+.code src/context.go /^func stackdriverLogrus/,/^}/
+
+* Deployment Platform
+- Cloud Providers: Google Appengine, Heroku, AWS Beanstalk
+- Roll-your-own: Docker/Dokku + EC2/GKE/DigitalOcean/etc
+- Consider using webpack/gulp/grunt or similar if your builds are complicated
+- Use [[https://github.com/jteeuwen/go-bindata][go-bindata]] or similar to roll all static assets into the Go binary and make deployment simple / no-brainer:
+.code src/deploy.sh    
+
+* Scaling / Balancing
+- Cloud Providers: AWS, Azure, and GCP all provide automated scaling backends with balancers - they all work on the principle of querying a fixed URL on your application for performance / metrics and then scale at that tier
+- To do it right: follow all the above and make sure that you have metrics everywhere and that all critical performance paths have been properly instrumented
+
+* Firebase
+.code src/context.go /^func firebaseExample/,/^}/
+
+* Leveraging, tradeoffs, and costs of using Go
+
+* EOF
+- Thanks again to EV Hive (specifically to Dewi)!
+- [[http://www.meetup.com/GoJakarta][GoJakarta]] for presenters! Please email [[mailto:ken@brank.as][ken@brank.as]]
+- [[https://brank.as/][Brankas]] is looking for Go and Android developers -- [[mailto:ken@brank.as][email me]]
+- Next meeting likely October 27th
