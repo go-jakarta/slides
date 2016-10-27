@@ -1,1 +1,19 @@
-syntax "proto3";
+syntax = "proto3";
+
+package src;
+option go_package = "github.com/kenshaw/go-jakarta/05-rest-to-grpc/src";
+
+import "google/api/annotations.proto";
+
+message EchoMessage {
+  string msg = 1;
+}
+
+service UtilService {
+  rpc Echo(EchoMessage) returns (EchoMessage) {
+    option (google.api.http) = {
+      post: "/api/echo"
+      body: "*"
+    };
+  }
+}

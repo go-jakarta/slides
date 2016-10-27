@@ -1,5 +1,5 @@
 Converting REST to gRPC in Go
-GoJakarta Meetup - October 2016
+Tech-a-Break + GoJakarta Meetup - October 2016
 
 Kenneth Shaw
 ken@brank.as
@@ -22,20 +22,34 @@ Tags: go, golang, cloud, rest, grpc
 - gRPC is a new (first release circa January 2015) RPC mechanism built by Google and Square
 - gRPC is built on top of HTTP/2, and has especially great performance characteristics
 - gRPC APIs are defined via Protobuf files, meaning that they are fully typed, and can be easily extended by user supplied options
+- gRPC is more complicated than traditional REST with JSON, but it provides really simple / easy ways to handle type safety and code generation that isn't possible from other methods
+- In a word, the benefits FAR outweigh the negatives!
 
 * Example REST Service (ExpressJS)
 .code src/sample.js
+.code test.sh /^curl/,/^  -d/
 
 * Example REST Service (Go)
+.code sample.go /^func main/,/^}/
 
+* About grpc-ecosystem
+- External project that makes it simple to expose gRPC services via REST via grpc-gateway
+- Also provides great utilities for things like Swagger file generation, etc.
+- Install all the extra dependencies:
+
+.code src/install.sh
 * Defining the service in gRPC
 - Translate REST calls to Protobuf service definition 
-#.code src/sample.proto
+.code src/sample.proto
 
 * Compiling Protobuf files
+.code src/gen.sh
 
-* Example gRPC Service (Go)
-#.code src/grpc.go
+* gRPC Service (Go)
+.code grpc.go /^type/,/ END/
+
+* gRPC REST JSON -> gRPC Proxy
+.code gateway.go /^func main/,/^}/
 
 * EOF
 - Thanks again to Tokopedia!
