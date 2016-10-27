@@ -1,0 +1,44 @@
+Converting REST to gRPC in Go
+GoJakarta Meetup - October 2016
+
+Kenneth Shaw
+ken@brank.as
+
+27 Oct 2016
+
+Tags: go, golang, cloud, rest, grpc
+
+* GoJakarta Meetup Info
+- Thank you to Tokopedia for their Tech-a-Break series!
+- GoJakarta is a monthly meetup focused on Golang, but will also incorporate other topics indirectly related to Go such as deploying Go apps to the cloud
+- Looking for presenters! We need presenters! Please!
+- Contact me [[mailto:ken@brank.as][ken@brank.as]] if you would like to do a presentation, have a suggestion for a topic, or have a suggestion for a location!
+- Slides available at [[https://github.com/kenshaw/go-jakarta][github.com/kenshaw/go-jakarta]]
+- Next Meetup: most likely November 29th, topic/location: TBD
+- Go 1.7.3 is now out, so upgrade!
+
+* About REST + gRPC 
+- REST ("Representational State Transfer") is one of the more popular ways to implement a type of stateless RPCs (remote procedure calls) via HTTP
+- gRPC is a new (first release circa January 2015) RPC mechanism built by Google and Square
+- gRPC is built on top of HTTP/2, and has especially great performance characteristics
+- gRPC APIs are defined via Protobuf files, meaning that they are fully typed, and can be easily extended by user supplied options
+
+* Example REST Service (ExpressJS)
+.code src/sample.js
+
+* Example REST Service (Go)
+
+* Defining the service in gRPC
+- Translate REST calls to Protobuf service definition 
+#.code src/sample.proto
+
+* Compiling Protobuf files
+
+* Example gRPC Service (Go)
+#.code src/grpc.go
+
+* EOF
+- Thanks again to Tokopedia!
+- [[http://www.meetup.com/GoJakarta][GoJakarta]] for presenters! Please email [[mailto:ken@brank.as][ken@brank.as]]
+- [[https://brank.as/][Brankas]] is looking for Go and Android developers -- [[mailto:ken@brank.as][email me]]
+- Next meeting likely Tuesday, November 29th
