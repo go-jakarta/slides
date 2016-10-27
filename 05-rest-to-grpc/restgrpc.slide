@@ -51,8 +51,11 @@ Tags: go, golang, cloud, rest, grpc
 * gRPC REST JSON -> gRPC Proxy
 .code gateway.go /^func main/,/^}/
 
+* Swagger Definition (generated)
+.code src/sample.swagger.json /"paths"/,/^  }/
+
 * EOF
 - Thanks again to Tokopedia!
-- [[http://www.meetup.com/GoJakarta][GoJakarta]] for presenters! Please email [[mailto:ken@brank.as][ken@brank.as]]
+- [[http://www.meetup.com/GoJakarta][GoJakarta]] needs presenters! Please email [[mailto:ken@brank.as][ken@brank.as]]
 - [[https://brank.as/][Brankas]] is looking for Go and Android developers -- [[mailto:ken@brank.as][email me]]
 - Next meeting likely Tuesday, November 29th
