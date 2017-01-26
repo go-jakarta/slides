@@ -1,0 +1,12 @@
+$ cd $GOPATH/src/github.com/knq/baseconv/
+$ go build
+$ go test -v
+=== RUN   TestErrors
+--- PASS: TestErrors (0.00s)
+=== RUN   TestConvert
+--- PASS: TestConvert (0.00s)
+=== RUN   TestEncodeDecode
+--- PASS: TestEncodeDecode (0.00s)
+PASS
+ok      github.com/knq/baseconv 0.002s
+$ go install
