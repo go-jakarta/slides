@@ -34,7 +34,9 @@ var _ = math.Inf
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
-const _ = proto.ProtoPackageIsVersion1
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type HelloRequest struct {
 	Greeting string `protobuf:"bytes,1,opt,name=greeting" json:"greeting,omitempty"`
@@ -45,6 +47,13 @@ func (m *HelloRequest) String() string            { return proto.CompactTextStri
 func (*HelloRequest) ProtoMessage()               {}
 func (*HelloRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
+func (m *HelloRequest) GetGreeting() string {
+	if m != nil {
+		return m.Greeting
+	}
+	return ""
+}
+
 type HelloResponse struct {
 	Reply string `protobuf:"bytes,1,opt,name=reply" json:"reply,omitempty"`
 }
@@ -53,6 +62,13 @@ func (m *HelloResponse) Reset()                    { *m = HelloResponse{} }
 func (m *HelloResponse) String() string            { return proto.CompactTextString(m) }
 func (*HelloResponse) ProtoMessage()               {}
 func (*HelloResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *HelloResponse) GetReply() string {
+	if m != nil {
+		return m.Reply
+	}
+	return ""
+}
 
 func init() {
 	proto.RegisterType((*HelloRequest)(nil), "helloworld.HelloRequest")
@@ -65,7 +81,7 @@ var _ grpc.ClientConn
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion1
+const _ = grpc.SupportPackageIsVersion4
 
 // Client API for HelloService service
 
@@ -100,16 +116,22 @@ func RegisterHelloServiceServer(s *grpc.Server, srv HelloServiceServer) {
 	s.RegisterService(&_HelloService_serviceDesc, srv)
 }
 
-func _HelloService_SayHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
+func _HelloService_SayHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HelloRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	out, err := srv.(HelloServiceServer).SayHello(ctx, in)
-	if err != nil {
-		return nil, err
+	if interceptor == nil {
+		return srv.(HelloServiceServer).SayHello(ctx, in)
 	}
-	return out, nil
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/helloworld.HelloService/SayHello",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HelloServiceServer).SayHello(ctx, req.(*HelloRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 var _HelloService_serviceDesc = grpc.ServiceDesc{
@@ -121,8 +143,11 @@ var _HelloService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _HelloService_SayHello_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "hello.proto",
 }
+
+func init() { proto.RegisterFile("hello.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
 	// 145 bytes of a gzipped FileDescriptorProto
