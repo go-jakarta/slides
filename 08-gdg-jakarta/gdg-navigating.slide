@@ -1,0 +1,160 @@
+Navigating through Google Cloud
+Google I/O Extended 2017: Jakarta Recap
+
+Kenneth Shaw
+ken@brank.as
+
+22 July 2017
+
+Tags: gcp, google, google cloud
+
+* Introduction + Background
+- Who are you? Coder? Admin? Management?
+- Goal is to help everyone to untangle the various services and APIs available on GCP
+- Show that GCP is easy(-ier) to use than other Clouds
+
+* . 
+.background images/01-icons.png
+
+* Computing
+
+* Google Compute Engine (GCE)
+- 1-64 processors
+- .6-416gb (fixed allocation per processor, depending on vm type)
+- Disk limits: 65tb (persistent), 3tb (SSD)
+- Preconfigured images
+- Custom Images
+- Fast start / allocation (15-20 seconds)
+- Can allocate GPUs
+
+* Cloud Launcher
+- Prebuilt Images
+- Single systems
+- Groups of systems
+
+* Container Engine (GKE)
+- Kubernetes
+- Docker Based
+- Orchestration System
+- Manages workloads / balancing of containers between operational nodes in computing cluster
+- Breaks out into aspects such as: Microservices and Batch + Scheduled jobs/services
+
+* Google App Engine (GAE)
+- True Platform-as-a-Service
+- Provides a runtime and API for many different languages, handles all scaling / deployments automatically
+- Suitable for "push-and-go" sites
+- Python, Java, PHP, Go
+
+* Google App Engine (Flexible GAE)
+- Docker based
+- Similar to regular GAE, but built on Docker
+- Different APIs, same scaling/deployment/ease-of-use as GAE
+- Can work with basically any language / framework (Ruby, etc)
+
+* Container Registry
+- Private Docker registry
+- Manages your Docker images / versions
+
+* Container Builder
+- Builds your Docker based containers for you
+- Integrated with Container Registry
+- Useful when you have complex / "big" containers with lots of custom / moving parts
+
+* Cloud Functions
+- NodeJS based
+- Event-driven
+- No overhead / scaling / monitoring / etc. required
+- Maps a route to a single function
+
+* Networking
+
+* Cloud Virtual Network
+- Private network
+- Ability to setup custom routing / connect external networks
+
+* Cloud Interconnect
+- Dedicated connection to Google
+- Direct / Local peering at a regional POP
+
+* VPN + Firewall
+- Standard software-based VPN + firewall configurations
+- Can apply rules / routing / tags
+- IPSEC compliant
+
+* DNS
+- 100% uptime SLA for DNS, managed by the same infrastructure as Google's DNS
+
+* Load Balancers
+- Highly configurable and scalable load balancing for HTTP, TCP, or SSL based services
+
+* Other Networking Services / APIs
+- Highly reliable CDN
+- Pre-built images for firewalls / other services
+
+* Storage
+
+* Cloud Storage
+- Multiple reliability / availability types: Multi-regional, Regional, Nearline, Coldline
+- Can enable S3 compatability
+
+* Cloud SQL
+- Conventional SQL (MySQL + PostgreSQL)
+- Vertically scalable
+- Managed (backups, replicas, etc)
+
+* Cloud Spanner
+- Structured data
+- Globally available, Highly scalable
+- Interesting trade-off between standard SQL + non-relational data storage
+- Expensive! But awesome!
+
+* Cloud Datastore
+- Indexable documents
+
+* Cloud Bigtable
+- Column based table storage
+- HBase compatible
+- Need a few terrabytes of data for this product to make financial sense
+
+* BigQuery
+- Send semi-structured data
+- "On-the-fly" SQL analysis for really large datasets
+
+* Pub/Sub
+- Standard publish/subscribe events/queues
+
+* StackDriver
+- Cross-cloud Logging + Monitoring
+- Simple agent install for VMs; even simpler API for in-app logging
+- Tracing + Error Reporting + Debugging
+- Amazing service! No reason to not be using this NOW!
+
+* Firebase
+- Mobile-focused services + APIs 
+- Non-relational database
+- Cloud Messaging (formerly GCM)
+- Analytics
+- Managed Users / Authorization
+
+* Cloud IAM
+- Role-based and fine-grained access controls for services / APIs
+
+* Other GCP Services / APIs
+- Cloud Launcher: prebuilt solutions for Cassandra, Redis, Mongo, CouchDB, etc.
+- Translation APIs
+- Speech / Vision / Natural Language APIs
+- DataProc
+- Dataflow
+- Cloud ML Engine (managed TensorFlow)
+
+* Working with GCP Services and APIs
+- Command-line (gcloud + gsutil)
+- IDE plugins (Visual Studio, Eclipse, IntelliJ, etc.)
+- API Manager: can enable/disable various APIs, configure limits, set access controls, etc.
+
+* .
+.background images/02-hookup.png
+
+* Thanks!
+- Brankas is hiring! Please email [[mailto:careers@brank.as][careers@brank.as]]
+- Monthly Go meetup: [[https://meetup.com/GoJakarta][meetup.com/GoJakarta]]
