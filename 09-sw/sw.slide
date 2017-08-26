@@ -1,0 +1,154 @@
+A Quick Tour of Go
+Software Architect Indonesia Community
+
+Kenneth Shaw
+ken@brank.as
+
+26 August 2017
+
+Tags: golang, go, software architecture
+
+* Why Go?
+- Go is a statically compiled, highly performant typed language with similar syntax to Java, C, or C++
+- Go is expressive, concise, clean, and efficient
+- Mixes "best-of-both worlds" aspects from dynamic, intrepreted languages and static, compiled languages
+- Designed for building very large projects, and with very large teams with a philosophy of "less is more"
+- Extremely great tooling and comprehensive standard library
+- Unbelievably fast build times
+- Easy to write and run tests for and easy to deploy
+- Rapidly able to write high-performant (near C-level performance) application servers, with a minimal amount of code
+- Makes writing code fun again!
+
+* Hello World!
+.code src/ex01/main.go
+
+- Building and compiling
+    $ cd $GOPATH/src/github.com/kenshaw/go-jakarta/09-sw/src/ex01
+    $ go build && ./ex01
+    hello world
+
+* Features of Go
+- Garbage collected, memory safe
+- Strong, expressive, flexible, but static type system, and types are first-class citizens
+- "Instant" build times
+- CSP style concurrent programming (goroutines)
+- Simple language, with minimal keywords + rules
+- Type composition
+
+* Whet the appetite ...
+.code src/ex02/main.go /^type/,/^}\)$/
+
+* Whet the appetite ... (2)
+.code src/ex02/main.go /^var fact/,
+
+* Whet the appetite ... (3)
+    $ go build && ./ex02 
+     1 :  1,      1
+     2 :  1,      2
+     3 :  2,      6
+     4 :  3,     24
+     5 :  5,    120
+     6 :  8,    720
+     7 : 13,   5040
+     8 : 21,  40320
+     9 : 34, 362880
+
+* Amazing CLI tools
+    # automatically format your code
+    gofmt -w -s file.go
+
+    # get a third-party package
+    go get -u github.com/knq/dburl
+
+    # install a command line tool
+    go install -u github.com/knq/xo
+
+    # run linters (ie, code checkers)
+    gometalinter
+- There are many many many other tools (official and community-built!) available for testing, static analysis, code generators, ...
+
+* Extensive, built-in standard library
+- Simple, easy to use and understand packages for building network servers, http servers, encryption, formatting strings, databases, etc.
+    io
+    strconv
+    net/http
+    encoding/json
+    image/{jpeg,png,...}
+    crypto/{rsa,ecdsa,x509,...}
+    regexp
+- And a lot more!
+
+* Widely supported, growing fast
+- Fastest growing programming language of 2016 and first half of 2017
+- Lots of well written, open-sourced packages / libraries / tools
+- Check [[https://golanglibs.com][golanglibs.com]] to search for packages / libraries
+
+* Where does Go shine?
+- Writing fast code, fast
+- Unit testing + benchmarking
+- HTTP + RPC + Microservices (ie, REST, gRPC, ...)
+- Application servers + backend infrastructure
+- Easy deployments, on the "cloud"
+- Integrating with C or C++ code, in a straight-forward and "easy" way
+ 
+* Example: built-in unit testing (ex03.go)
+.code src/ex03/ex03.go
+
+* Example: built-in unit testing (ex03_test.go)
+.code src/ex03/ex03_test.go
+- Writing benchmarks is similar to the above
+
+* Example: running unit tests
+    $ cd $GOPATH/src/github.com/kenshaw/go-jakarta/09-sw/ex03
+    $ go test -v
+    === RUN   TestConvertInt
+    --- PASS: TestConvertInt (0.00s)
+    PASS
+    ok  	github.com/kenshaw/go-jakarta/09-sw/src/ex03	0.001s
+- Handles code coverage, benchmarking, etc.
+
+* Example: simple HTTPS server with letsencrypt certificate
+.code src/ex04/main.go /^func main/,
+
+* Example: deploying a Go application
+- Deploying Go apps can be as simple as:
+    cd $GOPATH/src/github.com/kenshaw/go-jakarta/09-sw/ex04
+    go build
+    rsync -avP ex04 user@remote:/path/to/deployment
+    << kick instance >>
+- The single, static binary makes it easy to build images for AWS, GCP, Kubernetes, etc.
+- Easy to distribute (no dependencies other than the built binary)
+
+* Learning Go and the Go Community
+- Great community tutorials [[https://go-tour-id2.appspot.com/welcome/1][including in Bahasa Indonesia]]
+- Monthly meetups: [[https://meetup.com/GoJakarta][meetup.com/GoJakarta]]
+- Gophers Slack: [[https://gophers.slack.com][gophers.slack.com]]
+- [[https://t.me/joinchat/BOvecEKNCjKL5qJO2ElEqg][Indonesian Telegram group]]
+- Golang Weekly: [[https://golangweekly.com/][golangweekly.com]]
+- "Awesome Go" list: [[https://github.com/avelino/awesome-go][avelino/awesome-go]]
+- The actual Go source code!
+
+* Big Projects built in Go
+- Docker
+- Kubernetes
+- Terraform + Consul
+- Hugo
+- InfluxDB
+- CockroachDB
+- OpenShift
+- Many others!
+
+* Where is Go Used?
+- Brankas
+- Kudo + Grab
+- Tokopedia
+- Snapcart
+- Traveloka
+- Google, Facebook, Netflix, Cloudflare, all of Silicon Valley ...
+- Many, many more companies, in Indonesia and internationally!
+
+* Why should you build your next project with Go?
+
+* Thanks!
+- Brankas is hiring! Please email [[mailto:careers@brank.as][careers@brank.as]]
+- Monthly Go meetup: [[https://meetup.com/GoJakarta][meetup.com/GoJakarta]]
