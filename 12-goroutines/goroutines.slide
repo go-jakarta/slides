@@ -1,0 +1,91 @@
+Using Goroutines and Channels
+
+Kenneth Shaw
+ken@brank.as
+
+26 September 2017
+
+Tags: go, golang, advanced, goroutines, channels, introduction
+
+* But, First...
+- Big thank you to [[http://www.traveloka.co.id][Traveloka]] for hosting this event!
+- Please join [[https://www.meetup.com/GoJakarta][GoJakarta]] if you're not yet a member!
+- Telegram group
+- Facebook group
+
+* About GoJakarta
+- GoJakarta is a monthly meetup focused on Golang, but also incorporates other topics related to Go such as deploying Go apps to the cloud
+- Looking for presenters! We need presenters! Please!
+- Contact me [[mailto:ken@brank.as][ken@brank.as]] if you would like to do a presentation, have a suggestion for a topic, or have a suggestion for a location!
+- Slides available at [[https://github.com/kenshaw/go-jakarta][github.com/kenshaw/go-jakarta]]
+- Next Meetup: most likely October 22nd, topic/location: TBD
+
+* Goroutines
+- Probably the best / most interesting language feature of Go
+- Are a way to do concurrent processing (not PARALLELISM!) with Go
+- Specifically, Goroutines are CSP-like, lightweight, "green threads"
+- Like "coroutines" in other languages, but are different enough that they are not called coroutines
+- Allows developers to simply and easily convert any func in Go into a goroutine:
+.code src/simple.go /^func main/,/^}/
+
+* More about Goroutines
+- Very easily can have hundreds of thousands of goroutines running concurrently, without issue
+- Especially helpful when there are io bottlenecks
+- Note this is not like Node.JS's "async" code; Node.JS, Java, Python and MOST other programming languages that provide for parallelism / concurrency map threads to the system's thread handler
+- Goroutine scheduling is handled entirely by the Go runtime, not by the operating system
+
+* Goroutine "Gotchas" in Go
+- Maps are NOT safe -- they must be wrapped by a mutex, or some other low-level sync mechanism
+- Do not be tempted to overuse these; they are an advanced feature of Go, and trying to mimic/copy programming styles (ie, from Node.JS) will cause more headaches than necessary
+- Parent scopes do not go out of "view" of the started goroutine -- "if in doubt pass it as a parameter"
+
+* Sync, Wait
+- Problem with the previous example: doesn't "know" when the goroutines have finished
+- Can fix this using Go's standard sync package, with a WaitGroup:
+.code src/simplewg.go /^func main/,/^}/
+
+* Alternate with Channels
+- Can also be done with channels
+- Pick your poison
+- "Don't communicate by sharing memory, share memory by communicating" 
+- Would like to reiterate here, DO NOT OVERUSE channels!
+.code src/simplech.go /^func main/,/^}/
+
+* Maps
+- Maps are not safe to use (write) concurrently within Goroutines
+- Possibly a language design flaw (?)
+- No matter, simple concise way to add a guard to handle:
+.code src/simplemap.go /^func main/,/^}/
+
+* More about Sync
+- There are other low-level primitives such as the "atomic" standard package, which allows even more fine-grained, low-level sync patterns
+- There are built in types for handling resource pooling, single atomic integers
+- Much much more, but too much to cover tonight
+
+* Race detector
+- The Go race detector is fairly smart; it will likely find most problems and alert you ahead of time! Use it!
+
+* Context, Cancelation, Signalling
+- "context.Context" is a relatively new, powerful standard part of the Go library
+- Can handle canceling goroutines / "work" through very simple and easy patterns:
+.code src/simplectx.go /^func main/,/see you later/
+
+* Context, Cancelation, Signalling (cont'd)
+.code src/simplectx.go /see you later/,/^}/
+
+* More on Context
+- Most of the standard library (1.9+) now has context.Context enabled versions of many APIs
+- Allows a much simpler, easier way of composing things like middleware, complex goroutine heirarchies, and more
+
+* Worker Pool
+- Pattern for limited number of simultaneous workers
+- Useful when you don't want to spawn off 100,000+ goroutines at the same time
+.code src/simplepool.go /^func worker/,/^}/
+
+* Worker Pool (cont'd)
+.code src/simplepool.go /^func main/,/^}/
+
+* Brankas
+- Brankas is hiring! Email me!
+
+* Thank you
