@@ -1,0 +1,279 @@
+Deploying Go Containers
+
+Kenneth Shaw
+ken@brank.as
+
+19 December 2017
+
+Tags: go, golang, introduction, containers, docker, kubernetes, cloud
+
+* First...
+
+Big thank you to [[http://www.kudo.co.id][Kudo]] for hosting this event!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]] 
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on Golang, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us: 
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Dimas Yudha Prawira
+
+- [[mailto:prawira.dimas.yudha@gmail.com][prawira.dimas.yudha@gmail.com]]
+- [[tel:+62-812-2021-5924][+62-812-2021-5924]]
+
+* Next Meetup
+
+January 18th, 2018, topic/location: TBA
+
+- This is going to be a big one!
+
+* Go + Containers
+
+.background gopher-720p.png
+
+* Why Containers?
+
+Provides standardized, "self-contained", re-deployable apps
+
+- Composable, akin to Lego bricks (but not really)
+- Convention over configuration
+- Works the same* everywhere
+
+Enables "DevOps"
+
+- Significantly easier when dealing with "fleets"
+- Eliminates issues with recreating images on cloud providers
+- Properly segmented workloads / applications can be easily moved
+- Easier* to manage dependencies / upgrades
+
+* Docker + You
+
+There is no container but Docker.
+
+- Defacto standard
+- All other competing standards have been EOL'd/shutdown
+- LXC based; works on Windows, macOS, Linux, ...
+- Written in Go
+
+Portable:
+
+- Docker-based container services available for every major cloud provider
+- If a cloud provider doesn't have it, you can roll your own (k8s)!
+
+Large selection of base images / pre-configured apps to use:
+
+- Easy to tag + share images with others via public or private container registry
+
+* Working with Containers
+
+.background kudo-gopher.jpg
+
+* Command Overview
+
+Standard command line interface:
+
+    $ docker build -t <name> .
+    $ docker run -p 8080:8080 -d --rm --name <name> -it <name> 
+    $ docker stop <name>
+    $ docker ps
+    $ docker tag <source> <name>:<tag>
+    $ docker pull
+    $ docker push
+    $ docker help
+
+* Simple web app
+
+.code webapp.go
+
+* Building the code
+
+    $ cd $GOPATH/src/gophers.id/slides/13-containers
+    $ GOOS=linux go build -o webapp
+
+Keep in mind this won't work if you have C (CGO) dependencies and are not on Linux! 
+
+* Example cross-platform build with Docker
+
+If you have CGO dependencies, and need do a cross-platform build, then can use a script to build using Docker on non-Linux platforms:
+
+.code build.sh
+
+* Building the code (cont'd)
+
+Should always use a build script:
+
+- Reproducible
+- Useful when doing automated deployments
+- Can inject version or other build variables:
+
+    $ go build -ldflags="-X main.version=1.2.3.4"
+
+* Build the container
+
+A Dockerfile:
+
+.code Dockerfile
+
+Then:
+
+    $ cd $GOPATH/src/gophers.id/slides/13-containers
+    $ docker build -t aoeu .
+
+* Is this really what we want?
+
+Consider:
+
+    $ docker images
+    REPOSITORY                    TAG                 IMAGE ID            CREATED             SIZE
+    aoeu                          latest              28d92fc6b93b        17 minutes ago      740MB
+
+However:
+
+    $ du -sh webapp
+    6.3M	webapp
+
+Defeats the purpose of "composable"
+
+We can do much better.
+
+* Make it better
+
+A quick note on building Go code:
+
+- Go apps are self-contained, no need for a full operating system
+- Go apps don't typically need anything other than ca-certificates
+- Can be statically built, with no CGO dependencies
+- Can easily cross-compile from one platform to another
+
+* Slim containers
+
+Build statically:
+
+    $ cd $GOPATH/src/gophers.id/slides/13-containers/
+    $ CGO_ENABLED=0 go build -o webapp -ldflags="-w -s"
+
+A revised Dockerfile:
+
+.code Dockerfile.scratch
+
+* Rebuild
+
+And we rebuild our image:
+
+    $ cd $GOPATH/src/gophers.id/slides/13-containers/
+    $ docker build -t aoeu -f Dockerfile.scratch .
+
+And now:
+
+    $ docker images
+    REPOSITORY                    TAG                 IMAGE ID            CREATED             SIZE
+    aoeu                          latest              5bd40a88b2f0        3 seconds ago       4.18MB
+
+Much better!
+
+    $ docker run -p 8080:8080 -d --rm --name aoeu -it aoeu
+
+* Notes on slim containers
+
+*Caveat*: no Certificate Authorities, or any other files! 
+
+- Manually copy them, if needed.
+
+Alternately, if other tools/certs/etc. are needed, use a different image base:
+
+    FROM golang:1.9-alpine
+    FROM blitznote/debase:17.10
+    FROM ...
+
+Comparably:
+
+    $ docker images
+    golang                        1.9                 138bd936fa29        6 days ago          733MB
+    golang                        1.9-alpine          f421e93ece9c        2 weeks ago         269MB
+    blitznote/debase              17.10               c9cfa128e434        2 weeks ago         39.6MB
+
+* Deploying
+
+.background gopher-720p.png
+
+* Too many options ...
+
+- docker-compose
+- Kubernetes (k8s)
+- Google Container Engine (GKE, k8s-based)
+- AWS Elastic Container Service, Fargate, EKS + others
+- Azure Container Service (AKS)
+- Roll-your-own
+
+* docker-compose
+
+Simplifies orchestrating complicated deployments composed of multiple components/services. A docker-compose.yml:
+
+.code docker-compose.yml
+
+* docker-compose (cont'd)
+
+Has similar usage to Docker:
+
+    $ docker-compose build <name>
+    $ docker-compose up -d --scale <name>=3 
+    $ docker-compose down
+    $ docker-compose start <name>
+    $ docker-compose help
+
+Note that docker-compose defines a system of isolated nodes, and connections between images must be manually defined.
+
+Service names are resolved using an internal name server; should use the service name instead of "localhost".
+
+* Kubernetes (k8s)
+
+Enterprise-grade container management environment.
+
+- Based off Docker
+- Written in Go
+- Commercial, easy-to-use services available on all major cloud providers
+- Rapidly enables 
+- Cheap, fast, efficient
+
+* Working with Docker's API from Go
+
+Can work with Docker easily from Go:
+
+.code api.go /func main/,/^}/
+
+* Docker API (cont'd) 
+
+With the API, a number of possibilities in Go:
+
+- Build containers progammatically
+- Write custom deployment scripts / orchestration
+- Write application monitors
+- Automated triggers / notifications
+- Anything you can imagine!
+
+* Kubernetes API
+
+Wow that's complicated!
+
+- Able to manage / orchestrate fleets
+- You're now Google!

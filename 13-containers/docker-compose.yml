@@ -1,0 +1,23 @@
+version: "2"
+services:
+  books-server-rest:
+    image: books-server
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+    links:
+      - books-server-frontend
+    command: ["/usr/bin/rest", "-frontend=books-server-backend"]
+
+  books-server-backend:
+    image: books-server
+    expose:
+      - "8079"
+    ports:
+      - "8079:8079"
+    command: /usr/bin/backend
+    environment:
+      - DATABASE=/root/db.sqlite3
+    volumes:
+      - .:/root
