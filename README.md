@@ -2,6 +2,14 @@
 
 [GoJakarta](https://www.meetup.com/GoJakarta) meetup presentations.
 
-# Index
+## Getting these slides
 
-* Meetup No. 1 - [Introduction to Go](/01-intro-to-go), February 25th, 2016
+The presentations here can be retrieved using standard Go commands:
+
+```sh
+$ go get -u gophers.id/slides
+```
+
+## Viewing the slides
+
+Not yet hosted online.
