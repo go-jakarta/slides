@@ -273,7 +273,7 @@ With the API, a number of possibilities in Go:
 
 * Kubernetes API
 
-Wow that's complicated!
+[[https://github.com/kubernetes/client-go/blob/master/examples/create-update-delete-deployment/main.go][Wow that's complicated!]]
 
 - Able to manage / orchestrate fleets
 - You're now Google!

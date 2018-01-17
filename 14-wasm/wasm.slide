@@ -1,0 +1,178 @@
+Running Go Everywhere
+
+Kenneth Shaw
+ken@brank.as
+
+18 January 2017
+
+Tags: go, golang, wasm, webassembly
+
+* GoJakarta
+
+.background gopher-720p.png
+
+* First...
+
+Big thank you to [[http://www.tokopedia.com][Tokopedia]] for hosting this event!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]] 
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on Golang, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us: 
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Dimas Yudha Prawira
+
+- [[mailto:prawira.dimas.yudha@gmail.com][prawira.dimas.yudha@gmail.com]]
+- [[tel:+62-812-2021-5924][+62-812-2021-5924]]
+
+* Next Meetup
+
+Februrary 20th, 2018, topic/location: TBA
+
+- This is going to be a big one!
+
+* Running Go Everywhere
+
+* The Ideal
+
+Developers have sought to have a single, unified code-base that is "write-once", and "run anywhere", and additionally having the following characteristics:
+
+- Simple, easy to use and deploy
+- Fast, performant, agile
+- Runs on any platform (any architecture/environment including browser)
+- Requires no more than trivial changes to work on a new platform
+
+* History
+
+Different approaches to create the "ideal" have been made:
+
+- Java
+- ActiveX
+- Flash (swf)
+- PNaCL
+- JavaScript backend for LLVM
+- Haxe + others
+
+All have serious tradeoffs/compromises making it easier to build/develop multiple versions of the same code-base instead of trying to maintain the same code across different platforms.
+
+* History (cont'd)
+
+These all failed at creating the "ideal", due to a variety of reasons:
+
+- Complexity
+- Proprietary or required vendor lockin
+- Not standard, not "cross-platform"
+- Developer fatigue
+- Performance issues
+- Platform exclusion
+
+* Why not Go?
+
+Go has for some time been pretty close to the ideal:
+
+- Easy to understand, simple language with powerful and easy-to-use tooling
+- Fast, static single file builds that are easy to deploy
+- Powerful standard library that genuinely works the same on every platform
+- Compiles to efficient, native code
+- Well written/documented, open source
+- Easy to interface with native C/C++ libraries
+
+The only thing Go had been missing was a way to run in browsers: *until*now*.
+
+* WebAssembly (WASM)
+
+WebAssembly (WASM) is a way to run machine code in a browser.
+
+- A new, community-driven standard
+- Widely-accepted replacement for Java, Flash, PNaCL, etc. 
+- Supported in every modern browser (Chrome, Edge, Firefox, etc)
+- Available *right*now* in more than 85% of browsers in use today
+
+* WASM + Go
+
+An experimental Go branch provides direct WASM compilation, meaning that it is absurdly simple to build and run Go code *everywhere*.
+
+Until the changes have been integrated into the mainline Go source tree, some additional setup required:
+
+    $ cd /usr/local
+    $ git clone https://go.googlesource.com/go
+    $ cd go
+    $ git remote add neelance https://github.com/neelance/go.git
+    $ git checkout neelance/wasm-wip
+    $ cd src
+    $ ./make.bash
+
+And then one single Go build toolchain can build efficient machine code that runs *everywhere*.
+
+* Example code
+
+.code hello.go
+
+* Cross Platform Support with Go
+
+Compiling for other architectures/operating systems is trivial with Go:
+
+    $ cd $GOPATH/src/gophers.id/slides/14-wasm
+    
+    $ GOARCH=386   GOOS=linux  go build -o hello-x86_32 hello.go
+    $ GOARCH=amd64 GOOS=linux  go build -o hello-x86_64 hello.go
+    $ GOARCH=amd64 GOOS=darwin go build -o hello-mach64 hello.go
+
+Also possible to build native iOS and Android code with Go, but requires configuration and setup of SDKs outside the scope of tonight's presentation.
+
+* Building WASM with Go
+
+The experimental branch defines new `GOOS=js` and `GOARCH=wasm` values for Go:
+
+    $ GOOS=js GOARCH=wasm go build -o hello.wasm hello.go
+
+Also possible to do "go run" for built wasm:
+
+    # ensure that go_js_wasm_exec is on path:
+    $ export PATH=/usr/local/go/misc/wasm:$PATH
+
+    $ GOOS=js goarch=wasm go run hello.go
+
+* Running Go WASM in a Browser
+
+.code example.html
+
+* Simple Server
+
+.code server.go
+
+Simply run by:
+
+    $ go run server.go
+
+* The Future is Bright
+
+Things are extremely early for Go + WASM, but it will only get better:
+
+- Building and running WASM code from Go already simpler than most other languages
+- Will likely be integrated into main Go source tree in near future
+- Work is being done on truly cross platform (Desktop, Browser, and Mobile) UI packages
+
+Since WASM has wide, industy support and there are toolchains available for most programming languages:
+
+- Will be possible to call C, C++, Rust, Java, or other language, natively from within Go and without external dependencies
