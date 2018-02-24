@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package src;
+option go_package = "gophers.id/slides/16-grpc/src";
+
+import "google/api/annotations.proto";
+
+message EchoMessage {
+  // msg is a message.
+  string msg = 1;
+}
+
+service UtilService {
+  rpc Echo(EchoMessage) returns (EchoMessage) {
+    option (google.api.http) = {
+      post : "/api/echo"
+      body : "*"
+    };
+  }
+}

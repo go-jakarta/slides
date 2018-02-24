@@ -1,0 +1,20 @@
+
+*   Trying ::1...
+* TCP_NODELAY set
+* Connected to localhost (::1) port 8080 (#0)
+> POST /api/echo HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.57.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 22
+>
+* upload completely sent off: 22 out of 22 bytes
+< HTTP/1.1 200 OK
+< Content-Type: application/json
+< Grpc-Metadata-Content-Type: application/grpc
+< Date: Sat, 24 Feb 2018 02:25:08 GMT
+< Content-Length: 21
+<
+* Connection #0 to host localhost left intact
+{"msg":"hello world"}

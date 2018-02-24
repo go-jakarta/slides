@@ -1,0 +1,297 @@
+gRPC Microservices + Go
+Facebook Developer Circles, Bandung
+
+Kenneth Shaw
+ken@brank.as
+
+24 February 2018
+
+Tags: go, golang, 
+
+* About Me
+
+Ken Shaw: 
+
+- CTO and Founder of Brankas
+- Former CTO of Multiply.com
+- Started and sold a couple of technology companies
+- Lived in Asia since end of 2005, Indonesia since 2012
+- Created / maintain a few popular open source Go packages (usql, xo, chromedp)
+- Started GoJakarta
+
+* GoJakarta
+
+.background gopher-720p.png
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other related topics such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+Please join us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]] 
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* RPC
+
+A Remote Procedure Call ("RPC") is a way to invoke a function on a remote host. Effectively a way to distribute computational workloads across more one or more computers. There are a number of RPC standards:
+
+- CORBA
+- DCOM, .NET Remoting, WCF
+- ICE
+- SOAP
+- JSON-RPC
+- plus many, many others
+
+The above define standardized ways for two systems to communicate and exchange data via a common protocol and handle other aspects such as serialization, authentication, etc.
+
+* Conventional "n-tier" Architecture
+
+.image images/conventional.png
+
+* Microservices
+
+A microservice is a single, atomic, "self-contained" service (typically provided by a RPC mechanism) that handles one component or aspect of a system.
+
+For example, a "n-tier" application might be broken up into separate services, offloading work to a microservice for each major component:
+
+- View generation
+- User authentication
+- Reporting and Logging
+- Database
+- Single component logic
+
+* Conventional "n-tier" Architecture
+
+.image images/conventional.png
+
+* Microservices Architecture
+
+.image images/scalable.png
+
+* Benefits of Microservices
+
+- Break up "monoliths"
+- Horizontal and vertical scalability
+- Fault tolerance
+- Parallelism (speed) and deferring long running processes
+- Standardized ecosystem of tools, environments, software (when doing it right)
+
+* gRPC
+
+gRPC is a new RPC mechanism built by Google and Square:
+
+- First release circa January 2015
+- Built on top of HTTP/2, and shares the great performance characteristics of HTTP/2
+- Defined via an IDL (Protobuf files)
+- Clients and server communication code is generated for Java, PHP, C#, Python, Ruby, Go, others
+- Developers need only "plug" an application's logic in
+- Type-safe, fast, and efficient
+
+* Why gRPC for Microservices?
+ 
+gRPC is ideal for building microservices, because it allows developers to agree to an API contract and separately implement components independently of each other. 
+
+Additionally, gRPC's libraries and runtimes makes it extremely easy to refactor and split out existing parts of logic into a separate service enabling incremental migration to microservice-based architecture.
+
+Large technology companies are shifting their systems and APIs to gRPC-based microservices, primarily written in Go:
+
+- Google
+- Traveloka, GO-JEK, Grab/Kudo
+- Stripe, Atlassian, Cloudflare, DigitalOcean, Amazon
+- basically everyone!
+
+* Writing a gRPC service in Go
+
+* Protobuf
+
+Protobuf is a Interface Definition Language (IDL) that is similar to a programming language, and is used to define the data types, RPC methods, and services in gRPC.
+
+- `.proto` file extension
+- `option` metadata can be specified for use by generators
+- canonical mapping of data types to JSON types
+
+Similar to how one compiles code, `.proto` files are fed into the `protoc` compiler. The compiler in turn passes the parsed 
+data to various generators.
+
+* Sample Service Defined in Protobuf
+
+.code src/sample.proto
+
+* Generating gRPC Services
+
+Install the Protobuf compiler, `protoc`:
+
+    $ cd ~/src
+    $ git clone https://github.com/google/protobuf.git && cd protobuf
+    $ ./autogen.sh && ./configure && make -j6 && sudo make install
+
+Install Go code generators:
+
+    $ go get -u github.com/golang/protobuf/protoc-gen-go
+
+Generate Go server / client code:
+
+    $ cd $GOPATH/src/gophers.id/slides/16-grpc/src
+    $ protoc \
+      -I. \
+      -I/usr/local/include \
+      -I${GOPATH}/src \
+      -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+      --go_out=plugins=grpc:$GOPATH/src \
+      *.proto
+
+* Go Server Implementation
+
+Import the generated protobuf service stubs:
+
+.code grpc.go /package/,/^\)/
+
+* Go Server Implementation (cont'd)
+
+Define a type that handles the actual logic:
+
+.code grpc.go /START/,/END/
+
+* Go Server Implementation (cont'd)
+
+Create the grpc server and register the handler for the generated service definition:
+
+.code grpc.go /func main/,/^}/
+
+* Running the Server
+
+Build the server:
+
+    $ cd $GOPATH/src/gophers.id/slides/16-grpc/
+    $ go build -o grpc grpc.go
+
+Run:
+
+    $ ./grpc
+
+*  Go Client Implementation
+
+Client is similar:
+
+.code client.go /func main/,/^}/
+
+* Running the client
+
+Build the client:
+
+    $ cd $GOPATH/src/gophers.id/slides/16-grpc
+    $ go build -o client client.go
+
+Run: 
+
+    $ ./client
+    2018/02/24 09:31:28 response: msg:"hello!"
+
+* Code Generation and REST
+
+REST ("Representational State Transfer") is one of the more popular ways to implement a type of stateless RPCs via HTTP. 
+
+It would require a lot of work to expose gRPC services as REST. Luckily, there is the grpc-ecosystem which provides a wide variety of tools for working with gRPC:
+
+    # tool to generate a REST -> gRPC gateway
+    $ go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+
+    # tool to generate OpenAPI (swagger) definitions
+    $ go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+
+* Sample Service Defined in Protobuf
+
+.code src/sample.proto
+
+* Generating gRPC gateway and Swagger definition
+
+As before, can use the `protoc-gen-grpc-gateway` and `protoc-gen-swagger` tools to generate REST to gRPC code, and a Swagger file:
+
+    $ cd $GOPATH/src/gophers.id/slides/16-grpc/src
+    $ protoc \
+      -I. \
+      -I/usr/local/include \
+      -I${GOPATH}/src \
+      -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+      --grpc-gateway_out=logtostderr=true:$GOPATH/src \
+      --swagger_out=logtostderr=true:. \
+      *.proto
+
+* Implementing the REST Gateway
+
+Similar to the server implementation, the gRPC gateway is simply creating a server and registering the generated code:
+
+.code gateway.go /^func main/,/^}/
+
+* Putting it all together
+
+Build the gRPC gateway:
+
+    $ cd $GOPATH/src/gophers.id/slides/16-grpc
+    $ go build -o gateway gateway.go
+
+Run the server and gateway: 
+
+    $ ./server &
+    $ ./gateway
+
+Run a test:
+
+.code test.sh /curl/,/END/
+
+* curl output
+
+.code out.txt
+
+* Microservices Architecture
+
+.image images/scalable.png
+
+* More on gRPC Options + Microservices
+
+With protobuf options, it becomes very easy to build clients and services in a standardized fashion. 
+
+There are many generators publicly available for gRPC, that will handle many of the parts needed for a microservices architecture:
+
+- Authentication, access control, metering, limiting
+- Failover, balancing, and discovery
+- Auditing and logging
+
+Other tools are also available that can do  be injected via gRPC interceptors, middleware, or proxies.
+
+Additionally, it's worth noting that it is fairly straight forward (and relatively easy!) to build your own generators in Go or any other language of your choice!
+
+* EOF
+
+Thank you to Maker's Institute for hosting and for Facebook Developer Circles for setting up the event and inviting me to speak!
+
+* GopherCon
+
+GopherCon Singapore is looking for speakers!
+
+- Open until end of February
+- [[https://2018.gophercon.sg/][https://2018.gophercon.sg]]
+
+* Shirts + Stickers
+
+We have GoJakarta shirts and stickers:
+
+- Big stickers are Rp. 25.000
+- Shirts are Rp. 140.000
+
+* Brankas
+
+Brankas is hiring for all positions:
+
+- Frontend Developers
+- Backend Developers
+- Business Analysts
+- More!
+
+Check out [[https://brank.as/about][https://brank.as/about]]

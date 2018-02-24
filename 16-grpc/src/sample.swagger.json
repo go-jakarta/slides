@@ -1,0 +1,56 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "sample.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/echo": {
+      "post": {
+        "operationId": "Echo",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/srcEchoMessage"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/srcEchoMessage"
+            }
+          }
+        ],
+        "tags": [
+          "UtilService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "srcEchoMessage": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string",
+          "description": "msg is a message."
+        }
+      }
+    }
+  }
+}
