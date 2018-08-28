@@ -1,0 +1,14 @@
+$ cd $GOPATH/src/github.com/kenshaw/baseconv/
+$ go build
+$ go test -v
+=== RUN   TestErrors
+--- PASS: TestErrors (0.00s)
+=== RUN   TestZeroes
+--- PASS: TestZeroes (0.26s)
+=== RUN   TestConvert
+--- PASS: TestConvert (0.00s)
+=== RUN   TestEncodeDecode
+--- PASS: TestEncodeDecode (0.00s)
+PASS
+ok  	github.com/kenshaw/baseconv	0.268s
+$ go install

@@ -1,0 +1,772 @@
+Introduction to the Go Programming Language
+
+Kenneth Shaw
+ken@brank.as
+
+26 Apr 2018
+
+Tags: go, golang, intro, overview
+
+* But, First...
+
+Big thank you to [[https://www.launchgarage.com/][Launchgarage]] for hosting this event!
+
+Slides are available online:
+
+    $ go get -u gophers.id/slides
+
+Everything in this presentation will compile and run, and is available via above command.
+
+* GoManila
+
+.background gopher-barong-720.png
+
+* About GoManila
+
+GoManila is a new, monthly meetup that will be focused on the Go programming language:
+
+- Each session will have one or two (related) talks totaling roughly 50 minutes, with a 15-20 minute Q&A after each talk
+- Depending on popularity, will have regular meetings every month or every two months
+- Upcoming talks: Unit Testing, Writing Idiomatic Go Code, Concurrency vs Parallel (channels, in-depth), WASM + Go, gRPC
+
+Looking for speakers interested in doing a talk/topic!
+
+If you have suggestions for a topic, or want to cover something specific, please email me: [[mailto:ken@brank.as][ken@brank.as]]
+
+* Next Meetup
+
+Likely June 14th, 2018, topic/location: TBA
+
+- This is going to be a big one!
+
+* About Me
+
+I'm the founder of [[https://gophers.id][GoJakarta]], currently the second largest Go meetup in the world. 
+
+- I write code daily 
+- Founder / CTO of Brankas
+- Former CTO of Multiply.com
+- Lived in Manila from 2005-2010
+- Founded and sold a number of tech companies
+
+At the end of the day, I'm just a hacker passionate about hard technology problems, and I think that for many many many use-cases, Go is the best way to solve those problems.
+
+* The Go Language
+
+The Go Programming Language was developed internally by Google to solve the kind of problems unique to Google (ie, high scale services/systems):
+
+- Current Release: [[https://golang.org/dl][1.10.1, March 3rd, 2018]]
+
+Designers/developers of Go have deep ties to C/Unix:
+
+- Ken Thompson, Rob Pike, Robert Griesemer, et al
+
+* So what is Go?
+
+Go is a compiled programming language in the tradition of C and C++, with static typing, garbage collection, and unique language features enabling concurrent programming.
+
+.code src/hello.go
+
+* Feature Overview
+
+- Small and powerful standard library
+- Garbage collected
+- Statically compile (or cross-compile!) and deploy almost anywhere
+- Super-fast compiles and single binary deploys
+- Language/standard library are UTF-8 native
+- Design and behavior of language/standard library is opinionated
+- Since v1.5 (2015), 100% written in Go
+- Built in unit testing
+- Easy integration with C code/libraries
+- Less-is-more!
+
+* In My Opinion...
+
+The static typing, easy compilation, and rapid "compile and deploy anywhere" ability makes it uniquely suited to doing large systems coding without getting lost in dependency/JVM-like hell:
+
+- Great hybrid offspring of Python, C, Java, Ruby, and a variety of other languages
+- More-or-less eliminates the problems unique to scripted *and* compiled languages 
+
+Has one of the strongest ecosystems forming around the language, with the best written packages/libraries coming out over the last 2 years:
+
+- Will likely supplant Ruby, PHP, Python, NodeJS, and .NET backend services in the next 2-6 years
+- Will likely supplant Java in the enterprise over the next 5-10 years
+- Most large tech companies are choosing to do all *new* development in Go
+
+* Installing Go
+
+Download binaries from [[https://golang.org/dl][golang.org/dl]]
+
+Or, install from source:
+
+.code src/install.sh
+
+* Hello World again:
+
+.code src/hello.go
+
+* Run/Build/Install example:
+
+Run:
+
+    $ cd $GOPATH/src/gophers.id/slides/18-gomanila/src
+    $ go run hello.go
+
+Build and Execute:
+
+    $ go build hello.go && ls
+    hello hello.go
+    $ ./hello
+
+Install (puts hello in $GOPATH/bin/):
+
+    $ go install
+
+* Some Notes on Go's Syntax/Design
+
+The Go designers have purposefully omitted many common features in other languages in the interest of simplicity and readability above almost all else.
+
+The philosophy behind the design, is that if a proposed language feature can already be done through some other way in Go, then there is no need to add the additional feature.
+
+* Packages and go get
+
+Packages are simply a directory containing one or more `.go` files. Packages are retrievable via `go get`:
+
+    $ go get -u github.com/kenshaw/baseconv
+
+The above will retrieve the Go `github.com/kenshaw/baseconv` repository and store it in `$GOPATH/src/<url>`:
+
+    $ cd $GOPATH/src/github.com/kenshaw/baseconv && ls
+    LICENSE          README.md        baseconv.go      baseconv_test.go example
+
+A package may have any number of subpackages each of which is simply a subdirectory of that package, ie:
+
+    github.com/kenshaw/baseconv              // referenced as "baseconv", and sits in $GOPATH/src/github.com/kenshaw/baseconv
+    github.com/kenshaw/baseconv/subpackage   // referenced as "subpackage", and sits in $GOPATH/src/github.com/kenshaw/subpackage
+
+
+* Package Imports, and Visibility
+
+Packages (ie, libraries) can be imported into the current package:
+
+    import  "github.com/kenshaw/baseconv"
+
+Exported types, variables, func's etc, will then be usable within the Go file containing the import:
+
+    baseconv.DoSomething()
+
+Only func's and type's defined in that package beginning with a capital letter are visible when imported:
+
+    func doSomething() {} // not visible
+    func DoSomething() {} // visible
+
+When in doubt, use a capital letter.
+
+* Package Imports, and Visibility (cont'd)
+
+For example:
+
+    import (
+        "fmt"
+    )
+
+    fmt.Println("foobar")
+
+There are a couple special package names in Go: `main` and `internal`
+
+- The `main` package is the special "root" entry point package where the `main` func entry point is declared
+- The `internal` package can only be imported and used by peers within the same project
+
+* More on imports, naming, and side-effects
+
+You can change the name of the import package:
+
+    import (
+        j "github.com/kenshaw/baseconv" 
+    )
+
+    // baseconv's exported funcs/types are now available under 'j':
+    j.Decode62()
+
+Some packages need to be imported for their side-effect:
+
+    import (
+        // imports the postgres database driver package 
+        _ "github.com/lib/pq"
+    )
+
+* Building, Testing, and Installing a Go package
+
+.code src/build.txt
+
+* Quick Syntax Primer
+
+Go is C-like, but:
+
+- No semicolons: every line break implies a semicolon
+- Variable names declared *before* the type
+- Braces are *required* for control statements
+- Parentheses are *not*used* in control statements
+- Typing is implicit in assignments
+- Unused import or variable is a *compiler*error*
+- Trailing commas are *required*
+- Standard syntax formatting, *applied*automatically*
+
+* C vs Go, a simple comparison
+
+.code src/simple.c
+
+.code src/simple.go
+
+* Operators
+
+Usual operators:
+
+    +    &     +=    &=     &&    ==    !=    (    )
+    -    |     -=    |=     ||    <     <=    [    ]
+    *    ^     *=    ^=     <-    >     >=    {    }
+    /    <<    /=    <<=    ++    =     :=    ,    ;
+    %    >>    %=    >>=    --    !     ...   .    :
+         &^          &^=
+
+*NOTE*: operators are only are available as a single expression (*cannot* be inlined):
+
+    // valid
+    i++
+    j--
+
+    // not valid
+    j[i++]
+
+Otherwise, operators work as expected:
+
+    j *= 10
+    i = i + 15
+
+* Variables
+
+Variable names can include any UTF-8 code point:
+
+    var a = ""
+    var 世界 = 15
+
+    b := "awesome"
+
+Can be declared inside a `var` block:
+
+    var (
+        f bool
+        b = "different string"
+    )
+
+* Variables (cont'd)
+
+Supports multiple return values from functions:
+
+    func someFunc() (int, int) { return 7, 10 }
+
+    a, b := someFunc() // a = 7, b = 10
+
+Or just as declaration:
+
+    a, b := 0, "awesome"
+
+    var a, b string
+
+Special typeless variable _ can be used as placeholder, for when a returned value needs to be ignored:
+
+    a, b, _ = anotherFunc()
+
+* const
+
+Constants are declared using the `const` keyword, and can be any expression:
+
+    const a = "my value"
+
+Additionally, `const` can have a declared type:
+
+    const (
+        // typed const
+        MyConst string = "hello" 
+
+        // not typed
+        Aconst = 0
+    )
+
+*Note:* Go deals with constants in a much different way than other programming languages.
+
+* iota
+
+`iota` is special value only available in `const` blocks:
+
+    const (
+        MyConstA = iota // 0
+        MyConstB        // 1
+        MyConstC        // 2
+    )
+
+`iota` provides a way of calculating, at compile time, "incrementing" constants and can be used as part of any valid expression:
+
+    const (
+        MyConst0 = 2*iota // 0 
+        MyConst2          // 2
+        MyConst3          // 4
+    )
+
+* Standard Types (builtin)
+
+.code src/builtin.txt
+
+Types are the equivalent of the similarly named C types, but every value in Go is always initialized at declaration to its "0" value (shown above).
+
+* Slices, Maps, Arrays
+
+There are fixed-length arrays, but rarely used:
+
+    var a [8]byte
+
+A slice provides a dynamic amount (ie, a list) of any type:
+
+    var a = []int{15, 20, 9}
+    for i := range a {
+        fmt.Printf(">> %d\n", a[i])
+    }
+
+Maps (known as hashes in other languages) provides a robust map of key, value pairs for any type:
+
+    var a = map[string]int{
+        "foo": 10,
+        "bar": 15,
+    }
+    for k, v := range a {
+        fmt.Printf(">> %s: %d\n", k, v)
+    }
+
+* make and new
+
+`make` is used to create/initialize slices, maps, and channels:
+
+    a := make([]string, 15)           // a has type '[]string' and initial length of 15
+    b := make(map[string]interface{}) // b has type 'map[string]interface{}'
+    c := make(chan *Point)            // c has type 'chan *Point'
+
+`new` allocates a new instance of the type and returns a pointer to the allocated instance:
+
+    b := new(Point) // b has type '*Point'
+    p := &Point{}   // more or less the same as new(Point)
+
+* append, len, and reslicing
+
+`append` is used to append to a slice:
+
+    b := []string{"foo", "bar"}
+    b = append(b, "another string")
+
+`len` provides the length for slices, maps, or strings:
+
+    a := map[string]int{0, 12}
+    b := []int{14, 13, 3}
+    fmt.Printf("%d\n", len(a)) // prints 2
+    fmt.Printf("%d\n", len(b)) // prints 3
+    fmt.Printf("%d\n", len("hello")) // prints 5
+
+Any slice or array can be resliced:
+
+    a := []string{"foo", "bar", "make", "new"}
+    b := a[:1]  // slice from 0 to 1
+    c := a[1:3] // slice from 1 to 3
+    d := a[1:]  // slice from 1 to len(a)
+
+* Functions
+
+Functions are declared using the keyword `func`, with the return type follows the parameter list:
+
+    // doNothing does nothing (ie, a void).
+    func doNothing() {
+    }
+
+    // doSomething does something and then returns an error upon a failure, or nil upon success.
+    func doSomething(a string, c int) error {
+        return nil
+    }
+
+* Functions (cont'd)
+
+`func`'s are first class citizens, can be anonymous, and can be assigned to a variable:
+
+    func someFuncName() error
+
+    a := someFuncName // a has type 'func() error'
+
+    func main() {
+        var g := func() {
+            doSomething()
+        }
+        g()
+        func(b int) {
+          fmt.Printf("%d\n", b)
+        }(10)
+    }
+
+* defer
+
+`defer` is a unique feature of Go, allowing any func to be deferred (ie, executed after the func has returned):
+
+    func doSomething() error {
+        db, err := sql.Open(/* ... */)
+        if err != nil {
+            return err
+        }
+        defer db.Close()
+
+        err = db.Exec("DELETE ...")
+        if err != nil {
+            return err
+        }
+    }
+
+Deferred `func`'s are executed in *reverse* order of their `defer` declaration, and are primarily used to "unwind", cleanup, or otherwise release resources.
+
+* panic and recover
+
+`panic` is a special `func` that immediately halts the current goroutine:
+
+    panic("some error")
+
+`recover()` is a special `func` that can only be called in a `defer`'d `func`, allowing recovery after a `panic`:
+
+    func myFunc() {
+        defer func() {
+            if e := recover(); e != nil {
+                log.Printf("run time panic: %v", e)
+            }
+        }()
+
+        panic("my panic")
+    }
+
+*Note:* this should not be used to implement "exceptions."
+
+* Variadic parameters
+
+A `func` can have variable args (variadic)
+
+- Must be last parameter
+
+Uses special symbol `...` indicating expansion:
+
+    func doSomething(prefix string, intList ...int) {
+        for m, n := range intList {
+            fmt.Printf("> %s (%d): %d\n", prefix, m, n) 
+        }
+    }
+
+`...` is also used to indicate expanding a slice, when calling a variadic `func`:
+
+    intList := []string{1, 5, 10}
+    doSomething("my prefix", intList...)
+
+* Declaring Compound Types 
+
+No classes or objects in Go.
+
+`struct` provides compound ("structured") types:
+
+    type Point struct {
+        X, Y float64
+    }
+
+And `interface` defines a set of func's:
+
+    type Reader interface {
+        Read([]byte) (int, error)
+    }
+
+* Declaring Types and Type Aliases
+
+Can create a *new*type* based on another type:
+
+    type MyUnsignedInteger uint32
+    type MyPoint Point
+    type MyReader Reader
+    type MyFunc func(string) error
+
+Since Go 1.9, can declare a type alias:
+
+    type MyFunc2 = MyFunc // alias of MyFunc
+
+* Notes on Types
+
+Same export / visibility rules apply for `struct` member variables as for packages. 
+
+- Names starting with Upper case letters are visible to other packages; those with lower case letters are not
+
+For example, in the following, only code in the same package as `Point` can see `Point`'s member variable `j`:
+
+    type Point struct {
+        X, Y float64
+        j    int
+    }
+
+Type conversions (casts) are always explicit:
+
+    type MyStr string
+    a := MyStr("blah")
+    var b string = a // error
+
+* Receivers
+
+A `func` can have a type as a receiver:
+
+    type MyType struct {
+        MyValue int
+    }
+
+    // AddOne returns MyType's MyValue by 1.
+    func (mt MyType) AddOne() int {
+        return mt.MyValue+1
+    }
+
+A `func` with a pointer receiver, allowing the `func` to modify the receiver:
+
+    // Increment increments MyType's MyValue and returns the result.
+    func (mt *MyType) Increment() int {
+        mt.MyValue++
+        return mt.MyValue
+    }
+
+* About interface
+
+Unlike Java or other object-oriented languages, there is no need to explicitly declare a type as having an interface:
+
+    type Reader interface {
+        Read([]byte) (int, error)
+    }
+
+    type MyReader string
+
+    // Read satisfies the Reader interface. 
+    func (mr MyReader) Read([]byte) (int, error) { /* ... */ }
+
+    // DoSomething does something with a Reader.
+    func DoSomething(r Reader) { /* ... */ }
+
+    func main() {
+        s := MyReader("hello")
+        DoSomething(s)
+    }
+
+* Pointers, Interfaces, and nil
+
+Pointers are similar to pointers in C/C++ (address to a variable), but there is no pointer math in Go!
+
+"`.`" is used for both pointer dereference and for accessing a member variable:
+
+    a := Point{}  // b has type 'Point'
+    b := &Point{} // b has type '*Point'
+    *b = Point{}  // assign a different point to b
+    
+    // . is used for both a and b:
+    fmt.Printf(">> (%d %d) (%d %d)\n", a.X, a.Y, b.X, b.Y)
+
+Any variable that is a pointer or an interface can be assigned the `nil` value:
+
+    var a *Point = nil
+    var b MyReader = nil
+
+* Goroutines and Channels
+
+Goroutines is the truly "killer" feature of Go, providing efficient, easy-to-use, and lightweight concurrency in any application:
+
+    func main() {
+        for i := 0; i < 10; i++ {
+            go func(z int) {
+                fmt.Printf(">> %d\n", z)
+            }(i)
+        }
+        time.Sleep(1*time.Second)
+    }
+
+As per the above, by using the `go` keyword, the anonymous `func(z`int)...` was executed concurrently.
+
+* Channels (cont'd)
+
+Channels are a unique feature in Go providing type-safe memory sharing:
+
+    c := make(chan int)
+    c <- 10 // write 10 to c
+    j := <-c  // read int from c
+
+Channels can be declared read-only or write-only:
+
+    var c <-chan int // read only chan
+    var d chan<- int // write only chan
+
+* Goroutine and Channels (example)
+
+.code src/channels.go /^func main/,/^}/
+
+* Control Statements
+
+`if`/ `else`if` /`else`:
+
+    if cond {
+        expr
+    } else if cond {
+        expr
+    } else {
+        expr
+    }
+
+`switch`/`case`/`default`:
+
+    switch v {
+    case "e":
+        // something
+    default:
+        // default
+    }
+
+`switch` *do*not*require* `break` statements; and `case`'s do not automatically fallthrough.
+
+* Control Statements
+
+`switch` is commonly used as a  replacement for complex if/else chains:
+
+    switch {
+    case i == 0 && err != nil:
+        // something
+    case i == 6:
+        // something
+    case j == 9:
+        // something
+    default:
+        // default
+    }
+
+`select` is like `switch`, but waits on a channel:
+
+    select {
+    case a := <-c:
+        // read a from channel c
+    case <-time.After(15*time.Second):
+        // a 'timeout' after 15 seconds
+    }
+
+* Control Statements
+
+Only loop is `for`:
+
+    for cond {
+    }
+
+    for {
+        if !cond {
+            break
+        }
+    }
+
+    for i := 0; i < len(someSlice); i++ {
+    }
+
+    for key, value := range someSlice {
+    }
+
+In Go, *while* is spelled "for".
+
+* Handling Errors
+
+There is no try/case equivalent in Go. Instead, breaking flow and error control should be done by checking for an error:
+
+    func MyFunc() error {
+        return errors.New("error encountered")
+    }
+
+    err := MyFunc()
+    if err != nil {
+        // handle error
+    }
+
+Utility `func` in the standard library's `fmt` package, so can easily create a variable of type `error`:
+
+    func x() error {
+        err := fmt.Errorf("encountered: %d at %s", line, str) // err has type error
+        return err
+    }
+
+* Error Types
+
+The `error` type is a interface:
+
+    type error interface {
+        Error() string
+    }
+
+As such, any type can be made an `error`, simply by satisfying the `error` interface:
+
+    type MyError struct {}
+    func (me *MyError) Error() string {
+        return "my error"
+    }
+
+    func doSomething() error {
+        return &MyError{}
+    }
+
+* Quick Overview of the Standard Library
+
+Part of the power of Go is its robust and extremely well implemented standard library:
+
+    import (
+        "fmt"      // string formatting
+        "strings"  // string manipulation
+        "strconv"  // string conversion to standard types
+        "io"       // system input/output package
+        "sync"     // synchronization primitives
+        "time"     // robust time handling/formatting
+        "net/http" // http package supporting http servers and clients
+
+        "database/sql"  // standardized sql interface
+        "encoding/json" // json encoding/decoding (also packages for xml, csv, etc)
+
+        // template libraries for text and html
+        "text/template"
+        "html/template" 
+
+        // cryptographic libs
+        "crypto/rsa"
+        "crypto/elliptic"
+
+        "reflect"       // go runtime introspection / reflection
+        "regexp"        // regular expressions
+    )
+
+And many many many more!
+
+* What Go doesn't have (and why this is a good thing)
+
+- Generics
+- Implicit comparisons
+- Overloading
+- Objects
+- Ternary operator (?:)
+- Miscellany data structures (vector, set, etc)
+- Package manager**
+
+_**_for_certain_versions_of_the_phrase_"doesn't_have."_
+
+* Working Example
+
+See `src/ipinfo.go`
+
+* Q&A
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions:
+
+- Backend Developer
+- Frontend Developer
+- Business Analysts
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
