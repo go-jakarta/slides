@@ -1,0 +1,396 @@
+Kubernetes from Scratch
+
+Kenneth Shaw
+ken@brank.as
+
+13 September 2018
+
+Tags: scale, kubernetes, introduction, meetup
+
+* Scale Jakarta
+
+* First...
+
+Big thank you to [[http://kudo.co.id][Kudo]] for hosting this event!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/ScaleJakarta][meetup.com/ScaleJakarta]] 
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* Thank you Kudo!
+
+.background kudo-gopher.jpg
+
+* About Scale
+
+Scale is a monthly meetup group focused on the art and practice of building large scale computing infrastructure in Jakarta, Indonesia. Scale invites speakers from around Asia and the World to share their knowledge and experience with the greater technology community in Indonesia. Scale's technical topics cover everything from Microservices, DevOps, Programming Languages, Development Processes, Systems Architecture, Automation, Deployments, Coordination, Configuration Management, Cloud Computing Infrastructure, to other technical aspects associated with building and running applications that scale to thousands, millions, or hundreds of millions of active users.  
+
+Scale's community is built around a core group of Software Developers, Site-Reliability Engineers, Project Managers, Business Persons, and others who are interested in actively building large scale technology products and services in Indonesia.
+
+* Tonight's Slides
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us: 
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+* Next Meetup
+
+October 10th, 2018, topic/location: TBA
+
+* Kubernetes from Scratch
+
+* What is Kubernetes (K8s)?
+
+Kubernetes (K8s) is a container orchestration platform. 
+
+- Provides a systematic way of managing containers across a node fleet
+- Essentially a way of sharing a large numbers of computing resources (CPU, memory, hard disk, ...) as if a single system
+- Best way to deploy many different applications and services in a consistent, declarative fashion
+- Written in Go, uses Docker for containers, and is an open-source reimplementation of Google's Borg orchestration system
+
+Modern replacement for Apache Mesos and other clustering solutions.
+
+* Why Kubernetes?
+
+Kubernetes has completely taken over the DevOps world in last 3 years. It's quick adoption is unprecedented.
+
+- Provides a simple, consistent way of deploying large fleets across different clouds, datacenters, and on-premise systems
+- For every size shop (small, medium, large, enterprise), commercial solutions exist 
+
+Kubernetes is the simplest, easiest, and most inexpensive way to separate "deployments" from "hardware".
+
+- Straightforward / standardized to containerize workloads
+
+Originally, was difficult to setup Kubernetes clusters. However, now: 
+
+- Easy to setup and "roll-your-own"
+- No longer a need for complicated or expensive commercial solutions
+
+* Why Kubernetes? (cont'd)
+
+Kubernetes has an extremely small footprint, and runs anywhere:
+
+- Deploy on bare-metal, or any virtualization solution (vSphere, OpenStack, ...)
+- Integrates cleanly with SDN or conventional networking solutions
+- Runs on any OS: Linux, Windows, macOS, ...
+
+Kubernetes is perfect for IT teams that are consolidating different generations of physical servers, virtualization systems, clustering solutions, and other networking or computing resources.
+
+- In short: Kubernetes is the future.
+
+* Kubernetes from Scratch
+
+* Goals
+
+Primary goal: set up a small, real world example of an end-to-end Kubernetes (K8s), using up-to-date technology, configurations, and deployments:
+
+- Setup "bare metal" nodes
+- Setup networking, packages, command line tools, and basic firewalling
+- Setup `kubeadm` on nodes, and join to cluster
+- Configure local `kubectl` client
+- Demonstrate some simple commands
+- Expose k8s dashboard
+
+Do it all from the command-line!
+
+* Goals (cont'd)
+
+Secondary goal: write and deploy a small web app, and deploy it to the cluster using Helm
+ 
+- Create a source repository
+- Deploy apps in a better way (helm)
+- Author a small web application
+- Deploy web application
+- Deploy a CI/CD solution 
+
+* Part 1: Setting up a Cluster
+
+* Cluster Setup and Overview
+
+We will set up a simple 3 node cluster with 1 `master`, and 2 `workers`.
+
+Will use:
+
+- Ubuntu Xenial 16.04 x86_64
+- DigitalOcean VMs
+- 1 public IP per node
+- Private networking on secondary adapter
+
+Can use any kind of architecture, OS, or virtualization solution. For the most part, the installation should be very similar to what is presented tonight, however there might be small variations based on the OS and versions being used.
+
+* Setup Tools
+
+First, we need to set up our tools. For the sake of time, will assume that Go is already installed.
+
+Install the DigitalOcean command-line client:
+
+  go get -u github.com/DigitalOcean/doctl/cmd/doctl
+
+* Setup Nodes
+
+Allocate 3 nodes using the `doctl` command-line client:
+
+.code create-nodes.sh /droplet create/,/\n\n/
+
+- Name each node $NAME (`k8s**.sgp1.gophers.id`)
+- Use Singapore $REGION (`sgp1`)
+- Use 4 vCPU + 8 GB $SIZE (`s-4vcpu-8gb`)
+- Use Ubuntu 16.04 x86_64 $IMAGE (`ubuntu-16-04-x64`)
+- Pass cloud-init script as user data
+
+Note: choosing `s-4vcp-8gb` so the cluster is fast for tonight -- can easily use much smaller/cheaper images
+
+* cloud-init
+
+In the interest of time, will use `cloud-init` to install relevant packages and do minimal configuration of the nodes:
+
+.code cloud-config.yaml /#cloud-config/,/apt.kubernetes/
+
+* cloud-init (cont'd)
+
+.code cloud-config.yaml /packages/,/reboot/
+
+* Fix Node IP for kubelet
+
+On each node:
+
+  sudo perl -pi -e 's/KUBELET_EXTRA_ARGS=.*/KUBELET_EXTRA_ARGS="--node-ip='$(curl -s http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address)'"/' /etc/default/kubelet
+
+  sudo systemctl restart kubelet
+
+  ufw allow from 10.0.0.0/8
+
+* Create the Kubernetes Cluster
+
+Once the `k8s01` host is up, we can create the cluster:
+
+.code master-up.sh /enable external/,/kube\/config\n\n/
+
+* Create the Kubernetes Cluster (cont'd)
+
+.code master-up.sh /setup networking/,/popd/
+
+* Join Workers to Cluster
+
+.code worker-up.sh /kubeadm/,/\n\n/
+
+* Setup local control of Kubernetes cluster
+
+Copy access token for `kubectl` from `k8s01`:
+
+  mkdir -p ~/.kube/
+  rsync -avP k8s01.sgp1.gophers.id:~/.kube/config ~/.kube/config
+
+Change the hostname in the copied `config`:
+
+  perl -pi -e 's/server: https:.*/server: https:\/\/k8s-master.sgp1.gophers.id:6443\//' ~/.kube/config
+
+Check you can communicate with the cluster:
+
+  kubectl cluster-info
+
+  kubectl get nodes -o wide
+
+* Basic Kubernetes Commands
+
+Some simple `kubectl` commands:
+
+  # get basic version information 
+  kubectl version -o yaml
+  kubectl version -o json
+
+  # list everything
+  kubectl get all --all-namespaces -o wide
+
+  # get nodes
+  kubectl get nodes -o wide
+
+  # run and expose an image
+  kubectl run my-nginx --image=nginx --replicas=2 --port=80
+  kubectl expose deployment my-nginx --port=80 --type=LoadBalancer
+
+  # proxy services to localhost
+  kubectl proxy
+
+* Basic Kubernetes Commands (cont'd)
+
+  # describe a deployment
+  kubectl describe deployment <name>
+
+  # get logs for a pod
+  kubectl logs <name>
+  kubectl logs <name> -f
+  kubectl logs <name> --previous
+
+* Write a Small Web Service (in Go!)
+
+A small web service:
+
+.code sample-app.go /^var/,/^}/
+
+* Build and Run the App 
+
+Standard Docker commands:
+
+  cd ~/src/go/src/gophers.id/sample-app
+  docker build -t gojakarta/sample-app:latest .
+  docker push gojakarta/sample-app:latest
+
+Run the simple web service:
+
+  kubectl run sample-app --image=gojakarta/sample-app --port=8080 
+
+View the created deployment, service, pods:
+
+  kubectl get deployments
+  kubectl get services
+  kubectl get pods
+
+* Deploy the Guestbook Tutorial
+
+From [[https://kubernetes.io/docs/tutorials/stateless-application/guestbook/][the guestbook example]]:
+
+  # create the redis deployment
+  kubectl apply -f guestbook/redis-master-deployment.yaml
+
+  # create the redis service
+  kubectl apply -f guestbook/redis-master-service.yaml
+
+  # create redis slave deployment
+  kubectl apply -f guestbook/redis-slave-deployment.yaml
+
+  # create redis slave service
+  kubectl apply -f guestbook/redis-slave-service.yaml
+
+  # check pods + services
+  kubectl get pods
+  kubectl get services
+
+* Deploy the Guestbook Tutorial (cont'd)
+
+  # deploy the guestbook frontend
+  kubectl apply -f guestbook/frontend-deployment.yaml
+
+  # create frontend service
+  kubectl apply -f guestbook/frontend-service.yaml
+
+  # patch the frontend service
+  kubectl patch service frontend \
+    -p '{"spec":{"externalIPs":["'$(dig +short k8s01.sgp1.gophers.id)'"]}}'
+
+  # list the pods
+  kubectl get pods -l app=guestbook -l tier=frontend
+
+  # check frontend is responding externally
+  curl -v 'http://k8s01.sgp1.gophers.id'
+
+* Cleanup the Guestbook
+
+  kubectl delete deployment -l app=redis
+  kubectl delete service -l app=redis
+  kubectl delete deployment -l app=guestbook
+  kubectl delete service -l app=guestbook
+
+* Install Helm
+
+Helm is the Kubernetes "package manager". Easy to install:
+
+.code install-helm.sh /curl/,/template/
+
+Check that `helm` is properly configured:
+
+  helm list
+
+* Install Kubernetes Dashboard
+
+Kubernetes Dashboard is a simple UI / "pane of glass" for managing Kubernetes:
+
+  helm install stable/kubernetes-dashboard \
+    --name kubernetes-dashboard \
+    --namespace kube-system \
+    --set=service.externalPort=8443
+
+* Checkout the Kubernetes dashboard
+
+Skip the permissions:
+
+  kubectl apply -f dashboard-admin.yaml
+
+Use port-forward to access locally:
+
+  # access locally
+  export POD_NAME=$(kubectl get pods -n kube-system -l "app=kubernetes-dashboard,release=kubernetes-dashboard" -o jsonpath="{.items[0].metadata.name}")
+  echo https://127.0.0.1:8443/
+  kubectl -n kube-system port-forward $POD_NAME 8443:8443
+
+* Deploy Traefik
+
+Add a cluster role:
+
+  kubectl create clusterrolebinding add-on-cluster-admin \
+    --clusterrole=cluster-admin \
+    --serviceaccount=kube-system:default
+
+Install Traefik with `helm`:
+
+  helm install stable/traefik \
+    --name traefik \
+    --namespace kube-system \
+    --values traefik-values.yaml
+
+Patch service
+
+  kubectl patch service traefik -n kube-system \
+    -p '{"spec":{"externalIPs":["'$(dig +short k8s01.sgp1.gophers.id)'"]}}'
+
+* Deploy CI/CD
+
+Create a secret for Drone's GitHub auth:
+
+  kubectl create secret generic drone-server-secrets \
+      --namespace=default \
+      --from-literal=DRONE_GITHUB_SECRET="$(cat .github-secret)"
+
+Let's put Drone up on Helm:
+
+  helm install stable/drone \
+    --name drone \
+    --set server.env.DRONE_PROVIDER="github" \
+    --set server.env.DRONE_GITHUB="true" \
+    --set server.env.DRONE_ORGS="go-jakarta" \
+    --set server.env.DRONE_GITHUB_CLIENT="$(cat .github-clientid)" \
+    --set server.envSecrets.drone-server-secrets[0]=DRONE_GITHUB_SECRET
+
+Expose 9000:
+
+  kubectl patch service drone-drone \
+    -p '{"spec":{"externalIPs":["'$(dig +short k8s01.sgp1.gophers.id)'"]}}'
+
+* Brankas
+
+.background brankas-gopher.png
+
+* Brankas
+
+Brankas is hiring for all positions:
+
+- SREs
+- Project Managers
+- Frontend Developers
+- Backend Developers
+- Business Analysts
+
+Check out [[https://brank.as/about][https://brank.as/about]]

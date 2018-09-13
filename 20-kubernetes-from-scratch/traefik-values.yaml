@@ -1,0 +1,11 @@
+imageTag: 1.7
+ssl:
+    enabled: true
+    enforced: true
+acme:
+    enabled: true
+    email: 'kenshaw@gmail.com'
+    staging: false
+dashboard:
+    enabled: true
+    domain: 'traefik-dashboard.gophers.id'

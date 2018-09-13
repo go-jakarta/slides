@@ -1,0 +1,44 @@
+#cloud-config
+users:
+  - name: user
+    groups: sudo, docker
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG0VpXyS7XSOtkyobD0p97mqbDIst0bBz74f+aDzafV+ ken@ken-desktop
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMs1BPfFjct3PHcPIZM2+KXMV/732bVmE3MfqjH2EGIm ken@ken-mb
+
+apt:
+  sources:
+    docker:
+      keyid: '9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88'
+      source: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $RELEASE stable'
+    kubernetes:
+      keyid: '54A6 47F9 048D 5688 D7DA 2ABE 6A03 0B21 BA07 F4FB'
+      source: 'deb http://apt.kubernetes.io/ kubernetes-$RELEASE main'
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker-ce
+  - kubeadm
+  - kubelet
+  - kubectl
+  - dnsutils
+
+runcmd:
+  - sed -i -e '$aAllowUsers user' /etc/ssh/sshd_config
+  - sed -i -e '/^PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
+  - ufw allow ssh
+  - ufw allow from 10.0.0.0/8
+  - ufw enable
+  - mkdir -p /home/user/src
+  - git clone https://github.com/kenshaw/shell-config.git /home/user/src/shell-config
+  - git clone https://github.com/go-jakarta/slides.git /home/user/src/slides
+  - mv /home/user/src/slides/20-kubernetes-from-scratch /home/user/kube
+  - chown user:user -R /home/user
+  - su user -c 'rm ~/.bashrc && ~/src/shell-config/setup.sh'
+
+power_state:
+  mode: reboot
