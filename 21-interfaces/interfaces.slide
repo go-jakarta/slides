@@ -1,4 +1,4 @@
-Advanced Interfaces with Go
+Interfaces with Go
 
 Kenneth Shaw
 ken@brank.as
@@ -50,7 +50,7 @@ Dimas Yudha Prawira
 
 November 29th, 2018, topic/location: TBA
 
-* Advanced Interfaces with Go
+* Interfaces with Go
 
 * What are Interfaces
 
@@ -99,6 +99,33 @@ Interfaces can have one or more methods:
         return &InjectHandler{}
     }
 
+* Third Example
+
+    type Peeler interface {
+        Peel()
+        Name() string
+    }
+
+    type Apple struct { }
+    func (a Apple) Peel()
+    func (a Apple) Name() string { return "Apple" }
+
+    type Pear struct { }
+    func (p Pear) Peel()
+    func (p Pear) Name() string { return "Pear" }
+
+    func PeelFruit(z Peeler) {
+        fmt.Printf("Peeling: %s", p.Name())
+        z.Peel()
+    }
+
+    func main() {
+        fruitToPeel := []Peeler{Apple{}, Pear{}}
+        for _, p := range fruitToPeel {
+            PeelFruit(p)
+        }
+    }
+
 * What is the empty `interface{}`
 
 The interface type that specifies zero methods is known as the _empty_interface_:
@@ -142,9 +169,9 @@ The bigger the interface, the weaker the abstraction.
 When separating the implementation from the interface definition:
 
 - Service definitions / generators (gRPC)
-- Test harnesses (mocks)
-- When the handler's implementation is not important (http.Handler)
-- Abstracting
+- Test harnesses (mocks); dependency injections
+- Handlers, such as `http.Handler`
+- Type compositions
 
 * General Rules
 
@@ -154,7 +181,7 @@ Interfaces should have (usually) be no more than one or two methods:
         Error() string
     }
 
-Interfaces should be of the form -er of the primary method:
+Interfaces should be named as -er of the primary method:
 
     type Stringer interface {
         String() string
@@ -167,14 +194,98 @@ Packages should return concrete types, but accept interfaces:
     type Printer interface { 
         Print() error
     }
+    type Result struct { /* ... */ }
 
-    type MyPrinter struct {
+    type MyPrinter struct { /* ... */ }
+    func (m *MyPrinter) Print() error { /* ... */ }
+
+    func NewMyPrinter() *MyPrinter { /* ... */ }
+
+    func PrintSomething(p Printer) (Result, error) { /* ... */ }
+
+* Use in Standard Library
+
+- `error` interface
+
+- `http.Handler`
+    type Handler interface {
+            ServeHTTP(http.ResponseWriter, *http.Request)
     }
-    func ( Print() error
 
-   func NewMyPrinter()
+- `io.Writer` + `io.Reader` + others
 
+- Many other locations
 
+* Advanced Use: Package Sentinel Errors
+
+Since entire standard library recognizes `error`'s, can create package-level, sentinel errors that are immutable:
+
+    type Error string
+
+    func (err Error) Error() string {
+       return string(err)
+    }
+
+    const (
+        ErrCouldNotReadHost Error = "could not read host"
+    )
+
+* Advanced Use: Package Sentinel Errors (cont'd)
+
+These can be tailored to contain more complex, meta information such as error codes, or tracing/logging implementations:
+
+    type Error int
+
+    const MyError Error = 15
+
+    var errorCodeMap = map[Error]string{
+        MyError: "my error",
+    }
+
+    func (err Error) Error() string {
+        return errorCodeMap[int(err)]
+    }
+
+    func (err Error) Code() int { return int(err) }
+
+* Advanced Use: Middleware
+
+Using a interface in the standard library, allows "middleware" to pass along HTTP requests in a "chain":
+
+    type Logger struct { next http.Handler } 
+
+    func (l *Logger) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+        l.logSomething(res, req) 
+        l.next(res, req)
+    }
+
+    func main() {
+        l := &Logger{myMux}
+        http.ListenAndServe(":9090", l)
+    }
+
+* Advanced Use: Middleware (cont'd)
+
+Since any type in Go can have a method receiver on it, it allows for this common pattern:
+
+    type Handler {
+        ServeHTTP(ResponseWriter, *Request)
+    }
+
+    type HandlerFunc func(ResponseWriter, Request)
+    func (f HandlerFunc) ServeHTTP(res ResponseWriter, req *Request) {
+        f(res, req)
+    }
+
+And then:
+
+    type Logger struct { next http.Handler } 
+
+    func main() {
+        l := &Logger{http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+            /* ... do something ... */    
+        })}
+    }
 
 * Brankas
 
