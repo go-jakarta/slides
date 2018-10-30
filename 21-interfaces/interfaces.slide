@@ -1,0 +1,188 @@
+Advanced Interfaces with Go
+
+Kenneth Shaw
+ken@brank.as
+
+30 October 2018
+
+Tags: golang, interfaces
+
+* GoJakarta
+
+.background gopher-720p.png
+
+* First...
+
+Big thank you to [[https://www.xendit.com][XendIt]] for hosting this event!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]] 
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us: 
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Dimas Yudha Prawira
+
+- [[mailto:prawira.dimas.yudha@gmail.com][prawira.dimas.yudha@gmail.com]]
+- [[tel:+62-812-2021-5924][+62-812-2021-5924]]
+
+
+* Next Meetup
+
+November 29th, 2018, topic/location: TBA
+
+* Advanced Interfaces with Go
+
+* What are Interfaces
+
+An _interface_type_ is defined as a set of method signatures:
+
+    type Printer interface {
+        Print(string) error
+    }
+
+A value of a interface type `Printer` can hold any value that has the method receiver for `Print()`:
+
+    type MyPrinter struct {}
+    func (p *MyPrinter) Print(s string) error { /* ... */ }
+
+Interfaces are similar to interfaces in other languages, but Go types do not need to declare that they satisfy a interface. Instead, in Go, types that simply implement the interface (as above) can be used anywhere a `Printer` is required:
+
+    func MustPrint(p Printer, val string) {
+        if err := p.Print(value); err != nil {
+            panic(fmt.Sprintf("could not print %q: %v", val err))
+        }
+    }
+
+* Another Example
+
+Interfaces can have one or more methods:
+
+    type InjectExecutor interface {
+        Inject()
+        Execute(io.Writer) error
+    }
+
+    type InjectHandler struct {
+        vals []string
+    }
+    func (ih *InjectHandler) Inject(vals ...string) { 
+        ih.vals = append(ih.vals, vals...)
+    }
+    func (ih *InjectHandler) Execute(w io.Writer) error {
+        if w == nil {
+            w = os.Stdout 
+        }
+        return fmt.Fprintf(w, "values", ih.vals...)
+    }
+
+    func NewInjectHandler() InjectExecutor {
+        return &InjectHandler{}
+    }
+
+* What is the empty `interface{}`
+
+The interface type that specifies zero methods is known as the _empty_interface_:
+
+    interface{}
+
+Since all types have zero (or more) methods, all values in Go can satisfy the empty interface. As such, a variable with the type `interface{}` can hold any value:
+
+    var p interface{}
+
+    p = &MyPrinter{}
+    p = 10
+    p = "hello!"
+
+Note: empty interface is not the same as `void *`:
+
+- No casting required to assign to the empty interface
+- The empty interface is a pointer to a Go value, where as `void *` is a memory address 
+- The empty interface has both a type and a value
+
+* Comparisons
+
+The closest comparison is Java, however:
+
+- Go does not have an inheritance heirarchy in the way that OO languages do
+- Go's interfaces are implicit, Java (and related languages) require an explicit `implements` (or similiar)
+
+Since Go does not have "objects" (it has "types"), Go's interfaces can be more flexible. 
+
+- Any type (including the base types) can have method receivers declared on them
+- Allows much more composable type system
+
+* Pikeverbs
+
+The bigger the interface, the weaker the abstraction.
+
+`interface{}` says nothing.
+
+* Where are interfaces used?
+
+When separating the implementation from the interface definition:
+
+- Service definitions / generators (gRPC)
+- Test harnesses (mocks)
+- When the handler's implementation is not important (http.Handler)
+- Abstracting
+
+* General Rules
+
+Interfaces should have (usually) be no more than one or two methods:
+
+    type error interface {
+        Error() string
+    }
+
+Interfaces should be of the form -er of the primary method:
+
+    type Stringer interface {
+        String() string
+    }
+
+* General Rules (cont'd)
+
+Packages should return concrete types, but accept interfaces:
+
+    type Printer interface { 
+        Print() error
+    }
+
+    type MyPrinter struct {
+    }
+    func ( Print() error
+
+   func NewMyPrinter()
+
+
+
+* Brankas
+
+Brankas is hiring for all positions:
+
+- Backend Developers & SREs
+- Frontend Developers
+- Project Managers
+- Business Analysts
+
+Check out [[https://brank.as/about][https://brank.as/about]]
