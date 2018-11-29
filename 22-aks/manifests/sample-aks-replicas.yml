@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: sample-aks-deployment
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: sample-aks
+    spec:
+      containers:
+      - name: sample-aks
+        image: mytwoacrtest.azurecr.io/sample-aks:latest
+        command:
+        - /usr/bin/webapp
+        - -l=:8080
+        - -db=postgres://postgres%40postgres-test-second:P4ssw0rd@postgres-test-second.postgres.database.azure.com/postgres
+        ports:
+        - containerPort: 8080
+          name: sample-aks

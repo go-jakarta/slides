@@ -5,7 +5,7 @@ ken@brank.as
 
 29 November 2018
 
-Tags: golang, interfaces
+Tags: golang, kubernetes, azure, aks, postgres
 
 * GoJakarta
 
@@ -295,6 +295,71 @@ Get an author:
 Delete an author:
 
     $ curl -X DELETE http://13.76.227.118:8080/author/1
+
+* Scaling to Infinity
+
+* Add Nodes to the Cluster
+
+We only created the cluster with one node, as such first will need to add more nodes:
+
+    $ az scale \
+        --resource-group aks-test \
+        --name aks-cluster \
+        --node-count 3
+
+Check that the nodes are added to the cluster, and to load balancer:
+
+    $ kubectl get nodes -o wide
+    $ kubectl describe svc sample-aks-lb
+
+Increase `replicas` in the manifest, and apply:
+
+    $ kubectl apply -f manifests/sample-aks-replicas.yml
+
+Alternately:
+
+    $ kubectl scale --replicas=4 deployment/sample-aks-deployment
+
+* Update Manifests
+
+Update manifest to increase replicas:
+
+.code manifests/sample-aks-replicas.yml
+
+* Update and Rollout New Version
+
+Let's update our app and demonstrate how to rollout a new version.
+
+* Build, Tag and Push to Registry
+
+Build new image with Docker.
+
+    $ docker build -t mytwoacrtest.azurecr.io/sample-aks .
+
+Tag a new version:
+
+    $ docker tag mytwoacrtest.azurecr.io/sample-aks:latest mytwoacrtest.azurecr.io/sample-aks:v2
+
+Login to registry and push:
+
+    $ az acr login --name mytwoacrtest
+    $ docker push mytwoacrtest.azurecr.io/sample-aks:v2
+
+* Set Deployment Image
+
+After we've pushed the new version of the app, we roll out the updated version with `kubectl`:
+
+    $ kubectl set image deployment \
+        sample-aks-deployment \
+        sample-aks=mytwoacrtest.azurecr.io/sample-aks:v2
+
+Check on the deployment:
+
+    $ kubectl describe deployment sample-aks-deployment
+
+Verify new API works:
+
+    $ curl -d '{ ... }'
 
 * Q&A
 
