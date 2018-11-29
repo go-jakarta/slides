@@ -1,0 +1,313 @@
+Deploying Go Apps to the Cloud
+
+Kenneth Shaw
+ken@brank.as
+
+29 November 2018
+
+Tags: golang, interfaces
+
+* GoJakarta
+
+.background gopher-720p.png
+
+* First...
+
+Big thank you to [[https://www.microsoft.com][Microsoft]] for hosting this event!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]] 
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us: 
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Dimas Yudha Prawira
+
+- [[mailto:prawira.dimas.yudha@gmail.com][prawira.dimas.yudha@gmail.com]]
+- [[tel:+62-812-2021-5924][+62-812-2021-5924]]
+
+* Next Meetup
+
+December 15th, 2018, topic/location: TBA
+
+* Go on the Cloud
+
+.background gopher-720p.png
+
+* Anatomy of a Go Web App
+
+* Mission Overview
+
+Build a standard REST app to read/write from a database, and scale it to infinity on Azure.
+
+* App Overview
+
+Showcase simple "Authors" and "Books" example:
+
+- Authors have a name, and can be found by name
+- Books have an Author, and have a number of other fields (date, ISBN, ...)
+
+Use (mostly) the Go standard library to showcase how easy this can be:
+
+- Use Goji for simply for path handling
+- PostgreSQL database
+- Overview organization and package layout
+
+* File and Package Layout
+
+  $ ls $GOPATH/src/gophers.id/slides/22-aks/webapp
+  main.go  models   services
+
+Very simple package layout:
+
+    models    - database models and schema
+    services  - simple API server
+
+* Schema
+
+.code webapp/models/schema.sql /DROP/,/--/
+
+* Schema (cont'd)
+
+.code webapp/models/schema.sql /TABLE books/,/title_year/
+
+* Creating Schema and Generating Models 
+
+.code webapp/models/gen.sh
+
+* Implementation
+
+.code webapp/main.go /package/,/^\)/
+
+* Implementation (cont'd)
+
+.code webapp/main.go /var/,/^}/
+
+* Implementation (cont'd)
+
+.code webapp/main.go /func run/,/^}/
+
+* Implementation (cont'd)
+
+- Models
+- Services
+
+* Dockerfile
+
+.code Dockerfile
+
+* Building Docker Container
+
+.code build.sh
+
+* Deploying on Azure Kubernetes Service
+
+* Setup Azure
+
+Will use the Azure CLI to setup and scale the app:
+
+- macOS
+
+    $ brew update && brew install azure-cli
+
+- Linux
+
+    $ curl -L https://aka.ms/InstallAzureCli | bash
+
+- Windows
+
+Download `.msi` file from Azure site and install
+
+* Login to Azure and Setup AKS Client
+
+Login and check that Azure is working:
+
+    $ az login
+    $ az account list-locations
+
+Setup `kubectl`:
+
+    $ az aks install-cli
+
+* Create Resource Group
+
+We will create a single resource group for collecting all of our Cloud resources:
+
+    $ az group create \
+        --name aks-test \
+        --location southeastasia
+
+* Create and Setup PostgreSQL Database
+
+We will create a PostgreSQL server:
+
+    $ az postgres server create \
+        --resource-group aks-test \
+        --sku-name GP_Gen4_4 \
+        --location southeastasia \
+        --name postgres-test-second \
+        --admin-user postgres \
+        --admin-password P4ssw0rd
+
+Expose the PostgreSQL server:
+
+    $ az postgres server firewall-rule create \
+        --resource-group aks-test \
+        --server postgres-test-second \
+        --name allow-all \
+        --start-ip-address 0.0.0.0 \
+        --end-ip-address 255.255.255.255
+
+* Apply Database Schema
+
+Get connection information:
+
+    $ az postgres server show \
+        --resource-group aks-test \
+        --name postgres-test-second
+
+Apply database schema:
+
+    $ usql \
+        postgres://postgres%40postgres-test-second:P4ssw0rd@postgres-test-second.postgres.database.azure.com/postgres \
+        -f webapp/models/schema.sql
+
+* Create a Container Registry
+
+We need a private container registry for our app images. Create using Azure Container Registry (ACR):
+
+    $ az acr create \
+        --resource-group aks-test \
+        --name mytwoacrtest \
+        --sku Basic
+
+Login to the registry:
+
+    $ az acr login \
+        --name mytwoacrtest
+
+Get the registry address:
+
+    $ az acr list \
+        --resource-group aks-test \
+        --query "[].{acrLoginServer:loginServer}" \
+        --output table
+
+* Tag and Push Images to the Container Registry
+
+First, tag the local Docker images with the private container registry name:
+
+    $ docker tag sample-aks:latest mytwoacrtest.azurecr.io/sample-aks:latest
+
+Check the image is tagged correctly:
+
+    $ docker images |grep sample-aks
+
+Push the image:
+
+    $ docker push mytwoacrtest.azurecr.io/sample-aks:latest
+
+Check the images available in the registry:
+
+    $ az acr repository list --name mytwoacrtest --output table
+
+* Set up Service Principals and Access
+
+Create a service principal:
+
+    $ az ad sp create-for-rbac --skip-assignment
+
+Get the ACR resource ID:
+
+    $ az acr show --resource-group aks-test --name mytwoacrtest --query id --output tsv
+
+Grant access for AKS cluster to use ACR:
+
+    $ az role assignment create \
+        --assignee 12a8076b-bf77-4fa9-bfee-7f70070de0fe \
+        --scope /subscriptions/5bb00983-275d-446e-af57-b2ab6a629491/resourceGroups/aks-test/providers/Microsoft.ContainerRegistry/registries/mytwoacrtest \
+        --role Reader
+
+* Create a Cluster
+
+Create Kubernetes (AKS) Cluster:
+
+    $ az aks create \
+        --resource-group aks-test \
+        --name aks-cluster \
+        --node-count 1 \
+        --service-principal 12a8076b-bf77-4fa9-bfee-7f70070de0fe \
+        --client-secret fffea65b-9428-46e4-8c85-cb9e0b146b26 \
+        --enable-addons monitoring \
+        --generate-ssh-keys
+
+Get credentials for `kubectl`:
+
+    $ az aks get-credentials \
+        --resource-group aks-test \
+        --name aks-cluster
+
+* Sample App Manifest
+
+.code manifests/sample-aks.yml /api/,/---/
+
+* Sample App Manifest (cont'd)
+
+.code manifests/sample-aks.yml /---/,/app:/
+
+Apply manifest:
+
+    $ kubectl apply -f manifests/sample-aks.yml
+
+* Test the App
+
+Get exposed service:
+
+    $ kubectl get svc
+
+Create an author:
+
+    $ curl -d '{ "name": "author1" }' http://13.76.227.118:8080/author
+
+Get an author:
+
+    $ curl http://13.76.227.118:8080/author/1
+
+Delete an author:
+
+    $ curl -X DELETE http://13.76.227.118:8080/author/1
+
+* Q&A
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions:
+
+- Country Manager (Indonesia)
+- Sales and Marketing
+- Solutions Architect
+- Backend/Frontend Engnieers
+- Site Reliability Engineers
+- Business Analysts
+- QA
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
