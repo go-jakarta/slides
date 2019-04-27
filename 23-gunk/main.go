@@ -29,6 +29,10 @@ func (s *Server) Echo(ctxt context.Context, msg *pb.Message) (*pb.Message, error
 	return msg, nil
 }
 
+func (s *Server) UpdateStatus(ctxt context.Context, req *pb.UpdateStatusRequest) (*pb.UpdateStatusResponse, error) {
+	return &pb.UpdateStatusResponse{}, nil
+}
+
 // ENDSERVER OMIT
 
 func main() {

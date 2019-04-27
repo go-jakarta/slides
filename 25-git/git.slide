@@ -1,0 +1,205 @@
+Mastering Git Workflows
+
+Kenneth Shaw
+ken@brank.as
+
+BandungTech, 27 April 2019
+
+Tags: git
+
+* About
+
+Kenneth ("Ken") Shaw, formerly the CTO of Multiply.com, currently CTO of
+Brankas, a software and services provider for financial institutions in
+Southeast Asia.
+
+- Previously ran (solely) a 1.5 petabyte MySQL database cluster
+- Architect and primary developer behind a top 100 website, serving over 8000 requests per second
+- 18 years experience building payment processing and banking technology across Southeast Asia, US, and Europe
+- Active open source developer and contributor
+- Founder of GoJakarta (largest Go meetup group in world)
+
+* Mastering Git Workflows
+
+* Git
+
+Git is a distributed version control system (DVCS) originally created by Linus Torvalds.
+
+- Provides a way to work with non-linear source control workflows
+- Free and Open Source
+- Rapidly overtaken all other source control systems used in software development
+
+In my (Ken Shaw) opinion Git is the most powerful source control system
+available. While the command-line interface is sometimes inconsistent and can
+be difficult at times, there rarely is a task or problem in that Git cannot solve.
+
+* Quick Notes
+
+My goal in sharing this presentation, is to introduce people to what the
+"correct" way of using `git` is, in the hope that developers will take time to
+better learn the low-level features of Git, and not rely only on UIs/Frontends
+to Git for what can be daunting, but ultimately simple tasks.
+
+My goal is not to criticize how your organization is using Git today, but to
+help point developers who are frustrated with DVCS systems towards a better
+model that can vastly simplify and eliminate pain/strife when using Git.
+
+*NOTE:* This presentation is designed for developers who are somewhat familiar
+with Git, and understand the basics of "branches" and other source code
+management semantics.
+
+* The Problem with Git
+
+One problem with Git is that _many_ developers orginally learned "source
+control" with previous generations of non-distributed SCMs, such as Subversion,
+CVS, or Visual Source Safe. Many who did not learn Git "natively", try to map
+the same workflow of a centralized source control system onto the Git workflow.
+
+The problem is that while the workflows between centralized and DVCS can be
+very similar (if not identical), however the *nomenclature* (ie, _names_) is
+wildly different.
+
+The learning curve for Git can be high and can be confusing to developers who
+have not seen Git in action. However, mastering Git is no more difficult than
+almost anything else in Software Development.
+
+* Merge vs Rebase
+
+* About Git Merge
+
+Understand that in Git, a `git`merge` does not have the same semantics/meaning
+as "merge" in other source control systems. This is probably the single largest
+point of contention for developers that have prior experience with non-DVCS
+systems, but are new to Git.
+
+Git's `merge` is actually what's known as a "Ocotopus merge" or a "3-way merge":
+
+- Meant to merge 2 _or_more_ branches simultaneously
+- Never meant to be used regularly
+- Should only be used sparingly and only on extremely rare and under special circumstances
+
+Git's `merge` is meant for adding changes to multiple simultaneous releases
+(ie, "branches") that are in the source tree. For example, when the Linux Kernel
+is backporting/pushing a security fix to a `2.x.y`, a `3.x.y` and a `4.x.y`
+branch at the same time.
+
+* The problem with Git Merge
+
+* About Git Rebase
+
+While Git and non-DVCS systems use the word `merge` for merging changes between
+different code branches, Git's equivalent operation is not `merge`. It is
+`rebase`.
+
+Git `rebase` takes commits from a different branch, and _replays_ the
+changes, as if they were being done in the same timeline (order) as the
+original commits.
+
+`git`rebase` enables branches to appear to have a consistent, linear commit
+history, while `merge` is to _merge_ disparate timelines of multiple, different
+tracking branches.
+
+* A Note on Merge and Rebase
+
+While this may not be a popular opinion, it is _highly_unlikely_ that your
+team/organization ever needs to use `git`merge`:
+
+- `git`merge` is only useful for _routinely_ merging (back and forth) changes between different release branches
+- `git`merge` is not useful for products following "rolling" release cycles or that force users to upgrade to the "latest release"  (e.g. in a mobile app)
+
+Unless your organization has many different teams managing multiple release
+branches of the _same_ product _at_the_same_time_, your organization should
+*NEVER* need to use `git`merge`.
+
+That is, if your company's primary product is a web application, or mobile app,
+I can with almost 100% assurance state that your company _does_not_need_ `git`merge`.
+
+So please: stop using `git`merge` today, as it is a *red*flag* if a
+developer uses `git`merge` indiscriminately!
+
+* Pull Requests and Workflows
+
+* What a PR Workflow should be
+
+For every issue/ticket/feature:
+
+1. Developer creates a new branch from `master` into their own copy of the repository:
+
+    $ cd $SRC
+    $ git clone https://github.com/brankas/x.git && cd x
+    $ git checkout -b ISSUE-31_add_feature_x
+
+2. Developer should add a new _remote_ to their clone of the repository:
+
+    $ git remote add kenshaw https://github.com/kenshaw/x.git
+
+3. Developer makes any changes on their branch
+
+4. The developer periodically commits and push changes to their remote fork:
+
+    $ git commit -m 'Update 1' && git push kenshaw ISSUE-31_add_feature_x
+
+* What a PR Workflow should be (cont'd)
+
+5.  After the developer has made their commits, and is ready to share this back to the original project, they should _flatten_ the changes using `git`rebase`:
+
+    $ git commit -m 'Update 2' && git rebase -i origin/master
+
+6. After reconciling `master`, then the developer should push to their remote, and _overwrite_ any changes on the branch:
+
+    $ git push -f kenshaw ISSUE-31_add_feature_x
+
+7. Developer should then create a PR (if that exists on their Git system)
+
+8. Another developer then will `rebase` (not `git`merge`) those changes onto `master`. This can be done either through a UI and/or using the command-line:
+
+    $ git checkout master && git rebase kenshaw/ISSUE-31_add_feature_x
+    $ git push origin master
+
+* Workflow Notes
+
+If there are changes to the PR necessary before rebasing to `master`, then
+changes should be fixed on the developer's remote branch and once again
+_flattened_ if necessary.
+
+Ultimately, rewriting the branch history is up to the developer/organization
+and not always necessary. Indeed, when multiple commits make the change history
+more
+
+* Workflow Notes (cont'd)
+
+What should *NEVER* be done is to rewrite the history of the `master` or a
+release branch. Developers should expect a single, linear work history in
+`master` (or a release branch) of the parent repository. 
+
+All other forks / remotes / branches can be (and should be!) treated as
+transient, temporary branches used only to stage changes for incorporation
+against `master`.
+
+* Practical Demonstration
+
+* Tips and Tricks
+
+There are some quick ways to help accomplish the proscribed workflow:
+
+    # set git to always rebase on a new branch
+    $ git config --global branch.autosetuprebase always
+
+    # push to a different branch than what is checked out
+    $ git push myremote master:ISSUE-31_add_feature_x
+
+* Q&A
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions:
+
+- Country Manager (Indonesia)
+- Sales, Marketing, Business Development
+- Solutions Architect
+- Backend/Frontend Engineers
+- Site Reliability Engineers
+- Product, Design, and Development Interns
+- QA
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]

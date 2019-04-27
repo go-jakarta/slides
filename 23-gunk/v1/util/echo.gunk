@@ -22,6 +22,7 @@ const (
 	Error
 	OK
 )
+
 // ENDTYPES OMIT
 
 // CheckStatusResponse is the response for a check status.
@@ -43,7 +44,7 @@ type Util interface {
 	// }
 	Echo(Message) Message
 
-// START OMIT
+	// START OMIT
 	// CheckStatus sends the server health status.
 	//
 	// +gunk http.Match{
@@ -51,5 +52,22 @@ type Util interface {
 	//         Path:   "/v1/echo",
 	// }
 	CheckStatus() CheckStatusResponse
+
+	// +gunk http.Match{
+	//         Method: "POST",
+	//         Path:   "/v1/status",
+	//         Body:   "*",
+	// }
+	UpdateStatus(UpdateStatusRequest) UpdateStatusResponse
 }
+
 // END OMIT
+
+//
+type UpdateStatusRequest struct {
+	FieldName string `pb:"1"`
+}
+
+type UpdateStatusResponse struct {
+    
+}

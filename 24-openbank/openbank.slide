@@ -1,0 +1,228 @@
+Open Banking APIs and Architecture at Scale
+
+Kenneth Shaw
+ken@brank.as
+
+APIdays Singapore, 24 April 2019
+
+Tags: open banking, openbank, api, architecture, scale
+
+* About
+
+Kenneth ("Ken") Shaw, formerly the CTO of Multiply.com, currently CTO of
+Brankas, a software and services provider for financial institutions in
+Southeast Asia.
+
+- Previously ran (solely) a 1.5 petabyte MySQL database cluster
+- Architect and primary developer behind a top 100 website, serving over 8000 requests per second
+- 18 years experience building payment processing and banking technology across Southeast Asia, US, and Europe
+- Active open source developer and contributor
+
+* Open Banking APIs and Architecture at Scale
+
+* Overview
+
+In late 2017, a large Tier-1 consumer bank in Southeast Asia approached us (Brankas) to help with a new Open Banking and Digital Tranformation initiative:
+
+- Bank aimed to be the first in market to provide user account data, transactions, and payment flows in third-party eWallet apps, eCommerce platforms, and other partners
+- Race already on to provide modern, Open APIs to accommodate demands of "advanced" technology teams at eCommerce partners
+
+Unique institutional and enterprise hurdles: 
+
+- Legacy, "generational" and monolithic architecture
+- No "off-the-shelf" solutions available
+
+Any delays in project completion risked cancelation of entire project.
+
+- Limited staff, expertise, budget, time
+
+* Initial Architecture
+
+Backend mismash of "generational" technology:
+
+- 2 different Core Banking backends: a Oracle database and a AS400 beast
+- Most logic existed in "monolithic" tier of Java code and Stored Procedures
+- Non-homogenous backend service interfaces, namely SOAP, ISO8583, and non-idiomatic REST
+- No less than 4 different programming languages involved, each accessing the SPs directly
+
+Complex business rules and aggregation behavior that could not be changed:
+
+- X000s of branches would lose access
+- Not realistic to retrain staff on new system in available timeframe
+
+* Initial Architecture (cont'd)
+
+.image orig.png
+
+* Migration and Process Transformation
+
+The Bank aimed to transform its internal processes, giving teams better flexibility in delivering products/services to users:
+
+- Increase delivery speed from "concept" to "product"
+- Enable "self-service" allocation of computing resources by internal teams
+- Expose internal core systems to new teams, allowing next-generation use of the Bank's data (machine learning, ...)
+
+Additionally, Bank set requirement to migrate to linearly scalable architecture/infrastructure, making use of cloud-based solutions:
+
+- Monolithic architecture set upper limits on _how_much_ computing power could be tossed into the mix
+- Core system showing age, seeing diminishing returns from addition of bigger, more powerful/costly hardware
+
+* Adaption and Execution
+
+Bank chose to implement an Agile (Scrum) development methodology, and to incremently move and migrate the monolith to standardized microservices on the backend. 
+
+- Expectation that there would be no downtime, and that _new_ development would take priority
+
+Bank wanted to see progress on regular (daily) basis, and be able to "rollback" code if necessary.
+
+- Only authorized personnel should be allowed to rollback code, and new deployments/testing should be easy/painless
+
+Bank also wanted to ensure low costs and overhead, and adopt Open Source technology where possible.
+
+* Adaption and Execution - Agile, TDD, CI/CD
+
+*Solution:* Adopt Agile methodology, and ensure adhesion to process.
+
+*Solution:* Put in place Test-Driven-Development (TDD) and fully automated CI/CD pipelines.
+
+*Solution:* Use GitLab as the Source Control Management and CI/CD system.
+
+- Free and Open Source
+
+*Solution:* Move to standardized Development, Testing, Staging, and Production environments, and reflect via Branching strategy.
+
+* Cloud and Orchestration
+
+With a firm grasp on the _process_and_deployment_, Bank needed to reconcile where the new services would live:
+
+- Significant investment/footprint with large, on-premise vSphere (ESXi) cluster
+- Large number of "vanilla" Dell and HP servers
+- New OpenStack cluster
+
+Bank needed to leverage existing hardware investment, while enabling "Cloud" style development workflows for its internal teams.
+
+- Easy horizontal and vertical scaling of different components/services
+- Rapidly add/remove hardware/systems to accommodate changing demand
+- Upcoming deprecation/refresh cycle that needed to be accounted for
+
+Bank also planned to adopt a YTBD public cloud.
+
+* Cloud and Orchestration - Kubernetes
+
+*Solution:* Adopt Kubernetes as the single configuration and orchestration platform.
+
+- Advanced open-source orchestration solution that can be deployed anywhere
+- Future migration to public cloud is clear, as managed Kubernetes services are available on Azure, AWS, GCP, et al
+- Easy to deploy on existing systems via single binary
+- Containerized deployments reduces configuration overheads while still providing flexibility, reproducibliity, and "escape hatches"
+- Straightforward mechanism to dynamically add/remove/upgrade cluster nodes
+ 
+* Services Standardization
+
+Bank wanted to standardize services' contract definitions, and expose the
+yet-to-be-built Open Banking APIs via REST, and needed a clear migration path
+for existing services written in multiple/different languages.
+
+- Use standards where possible
+- Need to expose APIs for consumption by third-parties
+- Eliminate redundant code/authoring
+
+* Services Standardization - Microservices + gRPC
+
+*Solution*: Use API Gateway (Apigee) for frontend management and connectivity.
+
+*Solution:* Migrate backend to microservices incrementally, and connect via service mesh (Istio).
+
+*Solution:* Adopt gRPC for services definition and implementation.
+
+- Built/mantained by Google, and built on HTTP/2 and Protocol Buffers
+- Dead-simple to expose gRPC as REST via standardized annotations
+- Built-in/clear mechanism to expose services via standard oAuth2, and service boundaries
+- Easy to export API definitions to API gateway, Developer Portal, et al
+- No need to write/author SDKs or third-party integration libraries
+
+* Cloud-Native Development
+
+Bank realized that it was becoming untenable to continue with 4 separate backend programming languages:
+
+- Developers could not easily shift between the various generations of backend systems
+
+Certain languages in use (Java) were difficult to deploy under containers, and
+had significantly more memory or computing requirements than what could be made
+available.
+
+- Shortage of "high-memory" nodes/servers
+
+* Cloud-Native Development - Go
+
+*Solution:* For "new generation" services, such as Identity Management, Machine Learning, and others, adopt Go.
+
+- Built/maintained by Google
+- Comprehensive standard library and simple gRPC implementation
+- "Easy" to integrate with third-party libraries, APIs, systems
+- Single static binary
+- Efficient, fast with low memory requirements
+- Easy to deploy natively or via containers
+
+* Initial Architecture
+
+.image orig.png
+
+* New Architecture
+
+Bank decided to augment existing systems and slowly deprecate, over an extended period of time, existing components:
+
+- Process rigueur to ensure backwards compatibilty with existing systems.
+- Introduce MVP of Open APIs as priority
+
+Bank decided to explode monolith to standardized microservices, to gain much needed scalibility in short term.
+
+- Migrate Java monolith by creating service cut points reproducing same internal API
+- Migrate internal SOAP and REST endpoints to gRPC, where applicable
+- Where not possible, create standalone and consolidated SOAP and ISO8583 to gRPC gateway
+
+* New Architecture (cont'd)
+
+.image new.png
+
+* Results
+
+Bank was able to accomplish the first phase of the migration in just over 3 months:
+
+- No longer bottle-necked by performance / scaling issues
+- Greater density and use of existing hardware with Kubernetes, reducing costs for next refresh cycle
+
+Confidence in ability to _rapidly_ deploy new products/services to end users:
+
+- Adhesion to Agile process, and consistent tooling and management of software/deployments enables developers to focus on building core business services
+
+Bank now has an extensible _platform_ by which they can easily launch _new_ products and services without comprimising existing business:
+
+- Adding new APIs is as simple as writing a Service Contract definition in Go, and deploying on cluster
+
+* Results (cont'd)
+
+By breaking apart the monolith, and creating clear service boundaries between logic layers, the system can now:
+
+- Scale vertically through (future) breakup of logic layers into separate, compartmentalized microservices
+- Scale horizontally by increasing/decreasing the number of pods at the microservices layer
+
+By adopting GitLab, full CI/CD, and standardized deployment environments, pushing / rolling back code is vastly simplified:
+
+- Senior DevOps can push from "staging" to "production" branches of the code with a single Git command
+- Senior Management can view the status of development at any point in time, and can "rollback" to previous versions of the platform at anytime using GitLab's Management UI
+
+* Future
+
+Third-parties, Partners, and the Bank's other internal IT teams are now able to
+pilot and _innovate_ new services leveraging the same set of APIs.
+
+* Thank you!
+
+If you'd like to learn more, please visit Brankas in the Partners area.
+
+Web: *https://brank.as/*
+
+Personal Email: *ken@brank.as*
+
+Company Email: *info@brank.as*
