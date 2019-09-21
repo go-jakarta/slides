@@ -85,7 +85,8 @@ Go works with any IDE these days:
 - Visual Studio Code - is a strong, cross-platform IDE built by Microsoft, and works well with Go!
 - JetBrains GoLand - commercial IDE for Go
 - Plugins available for most other IDEs/editors -- Sublime, IntelliJ, etc
-- Or use Vi, Emacs ...
+
+Or use Vi, Emacs ...
 
 * Installing Visual Studio Code
 
@@ -94,7 +95,8 @@ Quick overview for installing Visual Studio Code:
 - [[https://code.visualstudio.com/][Download Installer]]
 - Open a Go file
 - Install the recommended Go extension
-- Write code!
+
+Write code!
 
 * Hello World again:
 
@@ -121,26 +123,26 @@ Install (builds the executable, and puts it in `$GOPATH/bin/`):
 
 Go code is grouped in "packages": a directory containing one or more .go files.
 
-Packages are retrievable via go get:
+Packages are retrievable via `go`get`:
 
-    $ go get -u github.com/knq/baseconv
+    $ go get -u github.com/kenshaw/baseconv
 
-The above will fetch the Go Git repository and store it in $GOPATH/src/$REPO:
+Fetches the repository (Git) and places it in `$GOPATH/src/$REPO`:
 
-    $ cd $GOPATH/src/github.com/knq/baseconv
-    $ ls
-    baseconv.go  baseconv_test.go  coverage.out  coverage.sh  example  LICENSE  old  README.md
+    $ cd $GOPATH/src/github.com/kenshaw/baseconv
+	$ ls
+	baseconv.go  baseconv_test.go  example  LICENSE  README.md
 
 A package may have any number of sub directories each of which is its own package, ie:
 
-    github.com/knq/baseconv              // would import "baseconv"
-    github.com/knq/baseconv/subpackage   // would import "subpackage"
+    github.com/kenshaw/baseconv              // would import "baseconv"
+    github.com/kenshaw/baseconv/subpackage   // would import "subpackage"
 
 * Package Imports, and Visibility
 
 Packages (ie, code libraries) can be imported into the current package:
 
-    import  "github.com/knq/baseconv"
+    import  "github.com/kenshaw/baseconv"
 
 Only `func`'s and `type`'s defined in that package beginning with a capital letter are visible when imported:
 
@@ -159,7 +161,7 @@ When in doubt, start the name with a capital.
 
 * Hello World again:
 
-The "`main`" package is a special package for program entry points, which must define the func "`main`":
+The `main` package is a special package for program entry points, which must define the func `main`:
 
 .code src/hello.go
 
@@ -168,7 +170,7 @@ The "`main`" package is a special package for program entry points, which must d
 You can define an import alias for a package:
 
     import (
-        j "github.com/knq/baseconv" 
+        j "github.com/kenshaw/baseconv" 
     )
     // baseconv's exported funcs/types are now available under 'j':
     j.Decode62()
@@ -196,12 +198,15 @@ Go is C-like, but:
 
 - No semicolons -- every line break implies a semicolon
 - Variable names come before the type
-- Braces are required for control statements (for, if, switch, ...)
+- Braces are required for control statements (`for`, `if`, `switch`, ...)
 - Parentheses are not used in control statements
 - Typing is implicit in assignments
 - Unused import or variable is a compiler error
 - Trailing commas are required
-- Standard syntax formatting that can be applied automatically with `gofmt` (most IDEs or editor's Go plugins do this out of the box)
+
+Unlike other languages, Go has standard syntax formatting, and an included tool, `gofmt` that can apply the syntax automatically:
+
+- Most IDEs or editor's Go plugins do this out of the box!
 
 * C vs Go, a simple comparison
 
@@ -247,7 +252,7 @@ Usual operators:
     %    >>    %=    >>=    --    !     ...   .    :
          &^          &^=
 
-Note: operators are only are available as a single expression (cannot be inlined), ie:
+Ooperators are only available as a single expression. That is, they cannot be inlined:
 
     // valid
     i++
@@ -265,13 +270,13 @@ Otherwise, operators work as expected:
 
 * Constants
 
-Go declares constants using the keyword "`const`":
+Go declares constants using the keyword `const`:
 
     const (
         MyString string = "foobar"
     )
 
-A "`const`" can be any expression:
+A `const` can be any expression:
 
     const (
         // typed const
@@ -283,7 +288,7 @@ A "`const`" can be any expression:
 
 * Constants (cont'd)
 
-"`iota`" is special value for incrementing constants:
+`iota` is special value for incrementing constants:
 
     const (
         MyConstA = iota // 0
@@ -304,7 +309,7 @@ A slice provides a dynamic list of any type:
         fmt.Printf(">> %d\n", a[i])
     }
 
-Maps (dictionaries/hashes in other languages) provides a robust map of key to value pairs for any type:
+Maps (called "dictionaries" or "hashes" in other languages) provide a robust map of key to value pairs for any type:
 
     var a = map[string]int{
         "foo": 10,
@@ -316,13 +321,13 @@ Maps (dictionaries/hashes in other languages) provides a robust map of key to va
 
 * make and new
 
-"`make`" is used to allocate either a slice, map or channel with a size:
+`make` is used to allocate either a slice, map or channel with a size:
 
     a := make([]string, 15)              // a has type '[]string' and initial length of 15
     b := make(map[string]interface{}, 0) // b has type 'map[string]interface{}'
     c := make(chan *Point)               // c has type 'chan *Point'
 
-"`new`" allocates a new instance of the type and returns a pointer to the allocated instance:
+`new` allocates a new instance of the type and returns a pointer to the allocated instance:
 
     b := new(Point) // b has type '*Point'
     p := &Point{}   // more or less the same as new(Point)
@@ -330,12 +335,12 @@ Maps (dictionaries/hashes in other languages) provides a robust map of key to va
 
 * append, len, and reslicing
 
-"`append`" is used to append to a slice:
+`append` is used to append to a slice:
 
     b := []string{"foo", "bar"}
     b = append(b, "another string") // b is now []string{"foo", "bar", "another string"}
 
-"`len`" provides the length for slices, maps, or strings:
+`len` provides the length for slices, maps, or strings:
 
     a := map[string]int{0, 12}
     b := []int{14, 13, 3}
@@ -352,17 +357,17 @@ Any slice or array can be resliced using `[:]`
 
 * func
 
-Functions are declared with "`func`", and the return type follows the parameter list:
+Functions are declared with `func`, and the return type follows the parameter list:
 
     func empty() {}                                       // no return value
     func doNothing(a string, c int) error { return nil }  // returns error
 
-A "`func`" can be assigned to a variable:
+A `func` can be assigned to a variable:
 
     func someFuncName() error { return nil }
     a := someFuncName // a has type 'func() error'
 
-A "`func`" can also be declared inline, or anonymously:
+A `func` can also be declared inline, or anonymously:
 
     func main() {
         g := func() {
@@ -376,7 +381,7 @@ A "`func`" can also be declared inline, or anonymously:
 
 * Control Statements
 
-`if/else`if/else`:
+`if` / `else`if` / `else`:
 
     if cond {
         expr
@@ -386,7 +391,7 @@ A "`func`" can also be declared inline, or anonymously:
         expr
     }
 
-`switch/case/default`:
+`switch` / `case` / `default`:
 
     switch v {
     case "e":
@@ -395,11 +400,11 @@ A "`func`" can also be declared inline, or anonymously:
         // default
     }
 
-"`switch`" does not require "`break`" statements and cases do not automatically fallthrough.
+`switch` does not require `break` statements and cases do not automatically fallthrough.
 
 * Control Statements
 
-"`switch`" as replacement for complex `if/else` chains:
+`switch` as replacement for complex `if` / `else` chains:
 
     switch {
     case i == 0 && err != nil:
@@ -412,7 +417,7 @@ A "`func`" can also be declared inline, or anonymously:
         // default
     }
 
-"`select`" is like "`switch`", but waits on a channel:
+`select` is like `switch`, but waits on a channel:
 
     select {
     case a := <-c:
@@ -423,7 +428,7 @@ A "`func`" can also be declared inline, or anonymously:
 
 * Control Statements
 
-In Go, "`while`" is spelled "`for`". The only loop in Go is "`for`":
+The only loop in Go is `for`:
 
     for cond {
     }
@@ -443,15 +448,17 @@ In Go, "`while`" is spelled "`for`". The only loop in Go is "`for`":
             }
         }
 
-    for key, value := range someSlice {
-    }
+    for key, value := range someSlice { /* ... */ }
 
-* Variadic parameters
+In Go, `while` is spelled `for`. 
 
-A "`func`" can have variable arguments ("variadic"):
+* Variadic parameters and expansion
+
+A `func` can have variable arguments ("variadic"):
 
 - Must be last parameter
-- Uses special expansion operator "`...`"
+
+Uses special expansion operator `...`:
 
     func doSomething(prefix string, intList ...int) {
         for m, n := range intList {
@@ -459,7 +466,7 @@ A "`func`" can have variable arguments ("variadic"):
         }
     }
 
-"`...`" also used to "expand" slice (when last parameter to a `func`), such as with "`append`":
+Can also use `...` to "expand" slice (when last parameter to a `func`), such as with `append`:
 
     strList := []string{"bar", "test", "you"}
     j := append([]string{"foo"}, strList...) // j is []string{"foo", "bar", "test", "you"}
@@ -468,13 +475,13 @@ A "`func`" can have variable arguments ("variadic"):
 
 No classes or objects:
 
-"`struct`" provides compound ("structured") types:
+`struct` provides compound ("structured") types:
 
     type Point struct {
         X, Y float64
     }
 
-And "`interface`" defines a set of `func`'s:
+And `interface` defines a set of `func`'s:
 
     type Reader interface {
         Read([]byte) (int, error)
@@ -514,9 +521,9 @@ Type conversions (casts) are always explicit!
     var b string = a         // compiler error
     var c string = string(a) // c is of type string and has value "blah"
 
-* Type Receivers
+* Receivers
 
-A `func` can be given a receiver:
+Any `type` can be given a `func` receiver:
 
     type MyType struct {
         MyValue int
@@ -530,7 +537,7 @@ A `func` can be given a receiver:
         return string(ms)
     }
 
-A `func` with a pointer receiver, allows the `func` to modify the value of the receiver:
+A receiver declared on a pointer to a `type`, allows the `func` to modify the value of the receiver:
 
     // Increment increments MyType's MyValue and returns the result.
     func (mt *MyType) Increment() int {
@@ -563,7 +570,7 @@ Unlike Java or other object-oriented languages, there is no need to explicitly d
 
 Go pointers are similar to pointers in C/C++ (address to a variable), but there is no pointer math in Go!
 
-The "`.`" operator is used for both pointer dereference and for accessing a member variable:
+The `.` operator is used for both pointer dereference and for accessing a member variable:
 
     type Point { X, Y int }
 
@@ -574,7 +581,7 @@ The "`.`" operator is used for both pointer dereference and for accessing a memb
     // . is used to access struct members for both a and b:
     fmt.Printf("(%d %d) (%d %d)", a.X, a.Y, b.X, b.Y) // prints "(10 20) (0 80)"
 
-Any `type` pointer or `interface{}` can be assigned the `nil` value:
+Any pointer to a `type` or `interface{}` can be assigned the `nil` value:
 
     type Reader interface{}
     var a *Point = nil
@@ -616,7 +623,7 @@ Channels are a unique feature in Go that provides type safe memory sharing:
 
 * Handling Errors
 
-There is no "`try/case`" equivalent in Go. Breaking program flow should be done by checking for an `error`:
+There is no `try` / `catch` equivalent in Go. Breaking program flow should be done by checking for an `error`:
 
     func MyFunc() error {
         return errors.New("error encountered")
@@ -628,19 +635,22 @@ There is no "`try/case`" equivalent in Go. Breaking program flow should be done 
         // handle error
     }
 
-Utility `func` in the standard library `fmt` package:
+The standard library provides `errors.New` and `fmt.Errorf` for quickly creating new errors:
 
-    fmt.Errorf("encountered: %d at %s", line, str) // returns a error
+	errors.New("my new error") 
+	fmt.Errorf("encountered: %d at %s", line, str)
+
+Both of the above return a single value of type `error`.
 
 * Error Types
 
-"`error`" is a special Go interface type:
+`error` is a special Go interface type:
 
-    interface error {
+    type error interface {
         Error() string
     }
 
-Any `type` can be an "`error`" by satisfying the `error` interface:
+Any `type` can be made an `error` type by satisfying the `error` interface:
 
     type MyError struct {}
     func (me *MyError) Error() string {
@@ -653,7 +663,7 @@ Any `type` can be an "`error`" by satisfying the `error` interface:
 
 * defer
 
-"`defer`" is another unique feature of Go that defers the execution of a `func` when the parent func returns:
+`defer` is another unique feature of Go that defers the execution of a `func` until the enclosing `func` returns:
 
     func doSomething() error {
         db, err := sql.Open(/* ... */)
@@ -667,7 +677,7 @@ Any `type` can be an "`error`" by satisfying the `error` interface:
 
 * defer (cont'd)
 
-"`defer`" can also defer execution to an anonymous `func`:
+`defer` can also defer execution to an anonymous `func`:
 
     func doSomething() error {
         defer func(a int) {
@@ -675,22 +685,23 @@ Any `type` can be an "`error`" by satisfying the `error` interface:
         }(15)
     }
 
-And can have multiple "`defer`"'s:
+And a `func` can have multiple `defer`'s:
 
-    func doSomething() error {
-        defer a()
-        defer b()
-    }
+	func doSomething() error {
+		defer a()
+		defer b()
+		return nil
+	} // b will execute, and then a when doSomething returns
 
-"`defer`"'d funcs will execute in the reverse order they were declared in.
+`defer`'d funcs will execute in the reverse order they were declared in.
 
 * panic and recover
 
-"`panic`" allows immediate halt of the current goroutine:
+`panic` allows immediate halt of the current goroutine:
 
     panic("some error")
 
-"`recover()`" can only be called in `defer`'d func's, but allows recovery after a panic:
+`recover()` can only be called in `defer`'d func's, but allows recovery after a panic:
 
     func myFunc() {
         defer func() {
@@ -701,7 +712,7 @@ And can have multiple "`defer`"'s:
         panic("my panic")
     }
 
-*Note:* panic's should not be used unless *absolutely* necessary. Use and check for an `error` instead.
+*Note:* `panic`'s should not be used unless *absolutely* necessary. Use and check for an `error` instead.
 
 
 * Quick Overview of the Standard Library
@@ -738,7 +749,7 @@ Go does not have:
 - Implicit comparisons
 - Overloading / Inheritance
 - Objects
-- Ternary operator (?:)
+- Ternary operator (`?` `:`)
 - Miscellany data structures (vector, set, etc)
 
 * Working Example

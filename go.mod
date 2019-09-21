@@ -8,3 +8,5 @@ require (
 	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 	google.golang.org/grpc v1.17.0
 )
+
+go 1.13

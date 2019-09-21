@@ -1,4 +1,4 @@
-$ cd $GOPATH/src/github.com/knq/baseconv/
+$ cd $GOPATH/src/github.com/kenshaw/baseconv/
 $ go build
 $ go test -v
 === RUN   TestErrors
@@ -8,5 +8,5 @@ $ go test -v
 === RUN   TestEncodeDecode
 --- PASS: TestEncodeDecode (0.00s)
 PASS
-ok      github.com/knq/baseconv 0.002s
+ok      github.com/kenshaw/baseconv 0.002s
 $ go install
