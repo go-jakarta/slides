@@ -85,6 +85,19 @@ Very simple package layout:
     models    - database models and schema
     services  - API service handler
 
+* Setup Local Database
+
+Create a simple Docker `testnet` network:
+
+    $ docker network create testnet
+
+Set up a local PostgreSQL database for testing:
+
+    $ docker run \
+        --rm -d --network testnet \
+        --name postgres \
+        postgres 
+
 * PostgreSQL Schema
 
 .code webapp/models/schema.sql /DROP/,/--/
@@ -333,7 +346,7 @@ Then, authorize ingress from EKS to RDS:
         --port 5432 \
         --cidr 192.168.0.0/16
 
-* Create EKS Service for RDS Instance
+* Grab RDS Endpoint for Manifest
 
 First, find the RDS endpoint:
 

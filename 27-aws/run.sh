@@ -3,12 +3,12 @@
 set -v
 
 docker build . \
-  --tag sample-aks:latest
+  --tag sample-api:latest
 
 docker run \
-  --name sample-aks \
+  --name sample-api \
   --detach \
   --network testnet \
   --rm \
   --publish 8080:8080 \
-  sample-aks
+  sample-api

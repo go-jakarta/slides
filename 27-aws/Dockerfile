@@ -1,4 +1,4 @@
-FROM golang:1.13
+FROM debian:stable-slim
 
 ADD ./webapp/webapp /usr/bin/
 
