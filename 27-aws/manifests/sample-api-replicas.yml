@@ -1,0 +1,27 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-api-deployment
+  labels:
+    app: sample-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sample-api
+  template:
+    metadata:
+      labels:
+        app: sample-api
+    spec:
+      containers:
+      - name: sample-api
+        image: 143383525987.dkr.ecr.ap-southeast-1.amazonaws.com/mycompany/sample-api:latest
+        command:
+        - /usr/bin/webapp
+        - -l=:8080
+        - -db=postgres://postgres:P4ssw0rd@test-postgres-instance.ce0k8zllu17k.ap-southeast-1.rds.amazonaws.com/postgres
+        ports:
+        - containerPort: 8080
+          name: sample-api

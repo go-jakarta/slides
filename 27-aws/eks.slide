@@ -1,0 +1,551 @@
+AWS Pop-up Loft: Deploying Go Apps on the Cloud
+
+Kenneth Shaw
+ken@brank.as
+
+23 October 2019
+
+Tags: golang, kubernetes, amazon web services, aws, postgres
+
+* GoJakarta
+
+.background gopher-720p.png
+
+* First...
+
+Big thank you to [[https://aws.amazon.com/][Amazon Web Services]] for hosting this event!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]] 
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on the Go programming language, but also
+incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a
+presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us: 
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Vinya Winda Sari
+
+- [[mailto:vidya.winda@gmail.com][vidya.winda@gmail.com]]
+- [[tel:+62-812-8640-1328][+62-812-8640-1328]]
+
+* Next Meetup
+
+November 10th, 2019, topic/location: TBA
+
+* Deploying Go Apps on the Cloud
+
+.background gopher-720p.png
+
+* Anatomy of a Go Web App
+
+* Mission Overview
+
+Build a standard REST app to read/write from a database, and scale it to
+infinity on AWS.
+
+* App Overview
+
+Showcase simple `authors` and `books` example:
+
+- `authors` have a `name`, and can be found by `name`
+- `books` have an `author`, and have a number of other fields (`date`, `isbn`, ...)
+
+Use (mostly) the Go standard library to showcase how easy this can be:
+
+- Use `github.com/brankas/goji` for simple for path handling
+- PostgreSQL database
+- Overview organization and package layout
+
+* File and Package Layout
+
+  $ ls $GOPATH/src/gophers.id/slides/27-aws/webapp
+  main.go  models   services
+
+Very simple package layout:
+
+    models    - database models and schema
+    services  - API service handler
+
+* PostgreSQL Schema
+
+.code webapp/models/schema.sql /DROP/,/--/
+
+* PostgreSQL Schema (cont'd)
+
+.code webapp/models/schema.sql /TABLE books/,/title_year/
+
+* Generating Models from Schema
+
+.code webapp/models/gen.sh
+
+* Go Server Implementation
+
+.code webapp/main.go /package/,/^\)/
+
+* Go Server Implementation (cont'd)
+
+.code webapp/main.go /var/,/^}/
+
+* Go Server Implementation (cont'd)
+
+.code webapp/main.go /func run/,/^}/
+
+* Go Server Implementation (cont'd)
+
+- Models
+- Services
+
+* Dockerfile
+
+.code Dockerfile
+
+* Building Docker Container
+
+.code build.sh
+
+* Deploying on Elastic Kubernetes Service
+
+* Setup AWS CLI
+
+Will use the AWS CLI to setup and scale the app:
+
+- macOS + Linux
+
+    $ pip3 install awscli --upgrade --user
+
+- Windows
+
+[[https://docs.aws.amazon.com/cli/latest/userguide/install-windows.html#install-msi-on-windows][Download `.msi` file from AWS and install]]
+
+* Configure AWS CLI and Setup EKS Client
+
+Login and check that AWS CLI is working:
+
+    $ aws configure
+    $ aws ec2 describe-regions 
+
+Unfortunately, different for Windows, macOS, and Linux:
+
+- [[https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html][Follow instructions for setting up `eksctl` for your OS]]
+
+Check `eksctl` is version `0.7.0` or higher:
+
+    $ eksctl version
+    [ℹ]  version.Info{BuiltAt:"", GitCommit:"", GitTag:"0.7.0"}
+
+* Create VPC for EKS + RDS
+
+Need to set up private subnet so that EKS can speak with RDS instances:
+
+    $ aws ec2 create-vpc \
+        --cidr-block 10.0.0.0/24
+
+The above will output `VpcId`, save it for use later:
+
+    $ export RDSVPCID="vpc-05be9f2c8868bcd51"
+
+* Create VPC Subnets
+
+Need to create two subnets (in different availability zones) for use with RDS:
+
+    $ aws ec2 create-subnet \
+        --vpc-id "$RDSVPCID" \
+        --availability-zone ap-southeast-1a \
+        --cidr-block 10.0.0.0/25
+    $ aws ec2 create-subnet \
+        --vpc-id "$RDSVPCID" \
+        --availability-zone ap-southeast-1b \
+        --cidr-block 10.0.0.128/25
+
+Each command above produces a `SubnetId`, save them for use later:
+
+    $ export SUBNETID1="subnet-0cc1c35847d811c3a"
+    $ export SUBNETID2="subnet-0759e1197b51559b1"
+
+* Associate Subnets with VPC
+
+Created subnets need to be associated with the VPC.
+
+First, grab the route table for the created VPC:
+
+    $ aws ec2 describe-route-tables \
+        --filters Name=vpc-id,Values="$RDSVPCID"
+
+The above will display the `RouteTableId`, save it for use later:
+
+    $ export RDSROUTETABLEID="rtb-0fb6edab7ef1496b7"
+
+Second, associate the two created subnets with the route table:
+
+    $ aws ec2 associate-route-table \
+        --route-table-id "$RDSROUTETABLEID" \
+        --subnet-id "$SUBNETID1"
+    $ aws ec2 associate-route-table \
+        --route-table-id "$RDSROUTETABLEID" \
+        --subnet-id "$SUBNETID2"
+
+* Create Subnet Group for RDS
+
+For RDS databases to speak to cluster nodes, RDS needs a subnet group:
+
+    $ aws rds create-db-subnet-group \
+        --db-subnet-group-name "test-subnet-group" \
+        --db-subnet-group-description "test-subnet-group-description" \
+        --subnet-ids "$SUBNETID1" "$SUBNETID2"
+
+* Create VPC Security Group
+
+The VPC needs a security group with that the RDS and EKS clusters can be
+associated with:
+
+    $ aws ec2 create-security-group \
+        --group-name "test-security-group" \
+        --description "test-security-group-description" \
+        --vpc-id "$RDSVPCID"
+
+The above will produce a `GroupId`, save it for use later:
+
+    $ export SECURITYGROUPID="sg-0f80ba8efa2824209"
+
+* Create RDS Cluster
+
+After successfully creating the subnets and security groups, we can create the
+actual RDS PostgreSQL instance:
+
+    $ aws rds create-db-instance \
+        --engine postgres \
+        --db-instance-identifier test-postgres-instance \
+        --db-instance-class db.t2.micro \
+        --allocated-storage 10 \
+        --master-username postgres \
+        --master-user-password P4ssw0rd \
+        --db-name postgres \
+        --no-publicly-accessible \
+        --vpc-security-group-ids "$SECURITYGROUPID" \
+        --availability-zone ap-southeast-1a \
+        --db-subnet-group-name test-subnet-group
+
+* Create Elastic Kubernetes Service (EKS) Cluster
+
+Create a EKS cluster:
+
+    $ eksctl create cluster \
+        --name test-cluster \
+        --version 1.14 \
+        --nodegroup-name standard-workers \
+        --node-type t3.medium \
+        --nodes 3 \
+        --nodes-min 1 \
+        --nodes-max 4 \
+        --node-ami auto
+
+Check cluster is up:
+
+    $ kubectl get nodes
+
+*Note:* Creation can take 15+ minutes to complete. 
+
+* Test EKS Cluster
+
+Test with a `busybox` image:
+
+    $ kubectl run test-busybox \
+        --rm --tty --stdin \
+        --image=busybox \
+        --restart=Never -- sh
+
+* Bridge EKS and RDS VPCs
+
+First, list active VPCs:
+
+    $ aws ec2 describe-vpcs
+
+The above should list a `VpcId` for each VPC. Find the one for the created
+EKS cluster (ie, the one with CIDR of `192.168.0.0/16`), and save for
+use later:
+
+    $ export EKSVPCID="vpc-0eba65043a65fcc6e"
+
+Then, create a peering connection for EKS and RDS VPCs:
+
+    $ aws ec2 create-vpc-peering-connection \
+        --vpc-id "$EKSVPCID" \
+        --peer-vpc-id "$RDSVPCID"
+
+* Bridge EKS and RDS VPCs (cont'd)
+
+The previous command will produce a `VpcPeeringConnectionId`, save it for use later:
+
+    $ export VPCPEERINGID="pcx-0287805248bc7ca9d"
+
+Accept the VPC peering connection:
+
+    $ aws ec2 accept-vpc-peering-connection \
+        --vpc-peering-connection-id "$VPCPEERINGID"
+
+Next, grab the public route table of the EKS cluster:
+
+    $ aws ec2 describe-route-tables \
+        --filters Name="tag:aws:cloudformation:logical-id",Values="PublicRouteTable"
+
+The above will produce a `RouteTableId`, save it for use later:
+
+    $ export EKSROUTETABLEID="rtb-010fc5edd9461fc32"
+
+* Route Traffic and Authorize Ingress from EKS to RDS
+
+Create routes for EKS to RDS and for RDS to EKS:
+
+    $ aws ec2 create-route \
+        --route-table-id "$EKSROUTETABLEID" \
+        --vpc-peering-connection-id "$VPCPEERINGID" \
+        --destination-cidr-block 10.0.0.0/24
+
+    $ aws ec2 create-route \
+        --route-table-id "$RDSROUTETABLEID" \
+        --vpc-peering-connection-id "$VPCPEERINGID" \
+        --destination-cidr-block 192.168.0.0/16 
+
+Then, authorize ingress from EKS to RDS:
+
+    $ aws ec2 authorize-security-group-ingress \
+        --group-id "$SECURITYGROUPID" \
+        --protocol tcp \
+        --port 5432 \
+        --cidr 192.168.0.0/16
+
+* Create EKS Service for RDS Instance
+
+First, find the RDS endpoint:
+
+    $ aws rds describe-db-instances
+
+The above should produce the RDS instance endpoint `Address`, save it for use later:
+
+    $ export RDSENDPOINT="test-postgres-instance.ce0k8zllu17k.ap-southeast-1.rds.amazonaws.com"
+
+Then, modify `manifests/sample-api.yml`, and change `-db=` value to point to `$RDSENDPOINT`.
+
+* Test EKS to RDS Connectivity and Apply Database Schema
+
+First, run a `postgres` image to test with:
+
+    $ kubectl run test-postgres \
+        --rm --tty --stdin \
+        --image=postgres \
+        --restart=Never -- psql "postgres://postgres:P4ssw0rd@${RDSENDPOINT}/postgres"
+
+Then, from within the launched pod, test connectivity to RDS with `\dt` metacommand:
+
+    If you don't see a command prompt, try pressing enter.
+    postgres=> \dt
+    Did not find any relations.
+
+Then, copy and paste schema into `postgres=>` prompt.
+
+- Surely better ways to apply schema to RDS, but there was not have enough time to research the best way to do that for AWS
+
+* Check Tables Exist
+
+Last, check tables exist, and then quit using `\q`:
+
+    postgres=> \dt
+              List of relations
+     Schema |  Name   | Type  |  Owner   
+    --------+---------+-------+----------
+     public | authors | table | postgres
+     public | books   | table | postgres
+    (2 rows)
+
+    postgres=> \q
+    pod "test-postgres" deleted
+
+* Login to Elastic Container Registry (ECR) with Docker 
+
+We need to login to the ECR so that we can push private images that can be used
+by EKS.
+
+Linux + macOS:
+
+    $ eval $(aws ecr get-login --no-include-email)
+    WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+    WARNING! Your password will be stored unencrypted in /home/ken/.docker/config.json.
+    Configure a credential helper to remove this warning. See
+    https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+    Login Succeeded
+
+Windows PowerShell:
+
+    Invoke-Expression -Command (aws ecr get-login --no-include-email)
+
+* Build Docker Image and Create ECR Repository
+
+Build the Docker image:
+
+    $ docker build -t sample-api .
+
+We now need to create a ECR repository where we can push our `sample-api` images:
+
+    $ aws ecr create-repository \
+        --repository-name mycompany/sample-api
+
+The above will outputs `repositoryUri`, save it for use later:
+
+    $ export REPOSITORYURI=143383525987.dkr.ecr.ap-southeast-1.amazonaws.com/mycompany/sample-api
+
+* Tag and Push Images to ECR
+
+Now we can tag the local Docker images with the private registry name:
+
+    $ docker tag sample-api:latest $REPOSITORYURI:latest
+
+Check the image is tagged correctly:
+
+    $ docker images |grep sample-api
+
+Push the image:
+
+    $ docker push $REPOSITORYURI:latest
+
+Check the image is available in the registry:
+
+    $ aws ecr describe-images \
+        --repository-name mycompany/sample-api
+
+* Sample App Manifest
+
+.code manifests/sample-api.yml /api/,/---/
+
+* Sample App Manifest (cont'd)
+
+.code manifests/sample-api.yml /---/,/app:/
+
+Apply manifest:
+
+    $ kubectl apply -f manifests/sample-api.yml
+
+* Test the App
+
+Get exposed service:
+
+    $ kubectl get svc
+
+The above will output the `EXTERNAL-IP` of the Elastic Load Balancer (ELB)
+created by the manifest. Save it for use later:
+
+    $ export SAMPLEHOST=a20d395f6f4b311e9b0c8021872af61f-898129700.ap-southeast-1.elb.amazonaws.com
+
+Create an author:
+
+    $ curl -d '{ "name": "author1" }' http://$SAMPLEHOST:8080/author
+
+Get an author:
+
+    $ curl http://$SAMPLEHOST:8080/author/1
+
+* Test the App (cont'd)
+
+Delete an author:
+
+    $ curl -X DELETE http://$SAMPLEHOST:8080/author/1
+
+* Scaling to Infinity
+
+* Add Nodes to the Cluster
+
+We only created a minimal cluster, so lets make it bigger by adding more nodes:
+
+    $ eksctl scale nodegroup \
+        --cluster test-cluster \
+        --name standard-workers \
+        --nodes 5
+
+Check that the nodes are added to the cluster, and to load balancer:
+
+    $ kubectl get nodes -o wide
+    $ kubectl describe svc sample-api-lb
+
+Increase `replicas` in the manifest, and apply:
+
+    $ kubectl apply -f manifests/sample-api-replicas.yml
+
+Alternately:
+
+    $ kubectl scale --replicas=4 deployment/sample-api-deployment
+
+* Update Manifests
+
+Update manifest to increase replicas:
+
+.code manifests/sample-api-replicas.yml
+
+* Update and Rollout New Version
+
+Let's update our app and demonstrate how to rollout a new version.
+
+* Build, Tag and Push to Registry
+
+Build new image with Docker.
+
+    $ docker build -t sample-api .
+
+Tag a new version:
+
+    $ docker tag sample-api:latest $REPOSITORYURI:v2
+
+Push to registry:
+
+    $ docker push $REPOSITORYURI:v2
+
+* Rollout New Deployment Image
+
+After we've pushed the new version of the app, we can roll out updated version
+to a deployment with `kubectl`:
+
+    $ kubectl set image deployment \
+        sample-api-deployment \
+        sample-api=$REPOSITORYURI:v2
+
+Check on the deployment:
+
+    $ kubectl describe deployment sample-api-deployment
+
+Verify new API works:
+
+    $ curl -d '{ ... }'
+
+* Q&A
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions:
+
+- Country Manager (Indonesia)
+- Sales and Marketing
+- Solutions Architect
+- Backend/Frontend Engineers
+- Site Reliability Engineers
+- Business Analysts
+- QA
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
