@@ -322,6 +322,7 @@ h2 {
   letter-spacing: -2px;
 
   color: rgb(51, 51, 51);
+  -webkit-text-stroke: 0.5px #cccccc;
 }
 
 h3 {
