@@ -518,7 +518,7 @@ We now need to create a ECR repository where we can push our `sample-api` images
 
 The above will show a `repositoryUri`, save it for use later:
 
-    $ export REPOSITORYURI=143383525987.dkr.ecr.ap-southeast-1.amazonaws.com/mycompany/sample-api
+    $ export REPOSITORYURI="143383525987.dkr.ecr.ap-southeast-1.amazonaws.com/mycompany/sample-api"
 
 * Tag and Push Images to ECR
 
