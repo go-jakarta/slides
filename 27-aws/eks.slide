@@ -49,12 +49,6 @@ Vidya Winda Sari
 
 November 10th, 2019, topic/location: TBA
 
-* Deploying Go Apps on the Cloud
-
-.background gopher-720p.png
-
-* Anatomy of a Go Web App
-
 * Brankas is Hiring!
 
 Brankas is hiring for all positions:
@@ -72,9 +66,15 @@ Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as
 
 .background brankas-hiring.png
 
+* Deploying Go Apps on the Cloud
+
+.background gopher-720p.png
+
 * Mission Overview
 
 Build a standard REST app to read/write from a database, and scale it to infinity with Amazon Web Services.
+
+* Anatomy of a Go Web App
 
 * App Overview
 
