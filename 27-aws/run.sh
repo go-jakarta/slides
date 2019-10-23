@@ -7,7 +7,6 @@ docker build . \
 
 docker run \
   --name sample-api \
-  --detach \
   --network testnet \
   --rm \
   --publish 8080:8080 \

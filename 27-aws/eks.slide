@@ -23,8 +23,7 @@ Please join the us online if you're not yet a member!
 
 * About GoJakarta
 
-GoJakarta is a monthly meetup focused on the Go programming language, but also
-incorporates other topics related to Go such as deploying Go apps to the cloud.
+GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
 
 Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
 
@@ -32,8 +31,7 @@ Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
 
 * Presenters + Contact
 
-Looking for presenters! We need presenters! If you would like to do a
-presentation, have a suggestion for a topic, or have a location we can use!
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
 
 Contact us: 
 
@@ -42,7 +40,7 @@ Ken Shaw
 - [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
 - [[tel:+62-811-168-1586][+62-811-168-1586]]
 
-Vinya Winda Sari
+Vidya Winda Sari
 
 - [[mailto:vidya.winda@gmail.com][vidya.winda@gmail.com]]
 - [[tel:+62-812-8640-1328][+62-812-8640-1328]]
@@ -57,10 +55,26 @@ November 10th, 2019, topic/location: TBA
 
 * Anatomy of a Go Web App
 
+* Brankas is Hiring!
+
+Brankas is hiring for all positions:
+
+- Country Manager (Indonesia)
+- Sales and Marketing
+- Solution Architects
+- Engineering Managers
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- Business Analysts
+- QA
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background brankas-hiring.png
+
 * Mission Overview
 
-Build a standard REST app to read/write from a database, and scale it to
-infinity on AWS.
+Build a standard REST app to read/write from a database, and scale it to infinity with Amazon Web Services.
 
 * App Overview
 
@@ -71,9 +85,9 @@ Showcase simple `authors` and `books` example:
 
 Use (mostly) the Go standard library to showcase how easy this can be:
 
-- Use `github.com/brankas/goji` for simple for path handling
-- PostgreSQL database
 - Overview organization and package layout
+- Use `github.com/brankas/goji` for simple for URL route handling
+- PostgreSQL database
 
 * File and Package Layout
 
@@ -91,11 +105,15 @@ Create a simple Docker `testnet` network:
 
     $ docker network create testnet
 
-Set up a local PostgreSQL database for testing:
+Spin up a local PostgreSQL database for testing:
 
     $ docker run \
-        --rm -d --network testnet \
         --name postgres \
+        --env POSTGRES_PASSWORD=P4ssw0rd \
+        --rm \
+        --detach \
+        --network testnet \
+        --publish 5432:5432 \
         postgres 
 
 * PostgreSQL Schema
@@ -127,58 +145,117 @@ Set up a local PostgreSQL database for testing:
 - Models
 - Services
 
+* Building the Web App
+
+.code build.sh
+
 * Dockerfile
 
 .code Dockerfile
 
-* Building Docker Container
+* Building and Testing with Docker
 
-.code build.sh
+First, build a `sample-api` image:
 
-* Deploying on Elastic Kubernetes Service
+    $ docker build -t sample-api .
 
-* Setup AWS CLI
+Then, run the image locally for testing:
 
-Will use the AWS CLI to setup and scale the app:
+    $ docker run \
+        --name sample-api \
+        --rm \
+        --network testnet \
+        --publish 8080:8080 \
+        sample-api
 
-- macOS + Linux
+* Deploying on Amazon Web Services
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions:
+
+- Country Manager (Indonesia)
+- Sales and Marketing
+- Solution Architects
+- Engineering Managers
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- Business Analysts
+- QA
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background brankas-hiring.png
+
+* Scalable Overview
+
+Our goal for tonight is to be able to scale our web app "to infinity." 
+
+We will accomplish that by leveraging Amazon Web Services' (AWS) Elastic Kubernetes Service (EKS) and Relational Database Service (RDS). EKS and RDS will allow us to dynamically scale our computing environment/database to any size, speed, or throughput we need. 
+
+With EKS it's simple to scale up to hundreds (or thousands!) of web app frontends speaking to a fully managed, backend PostgreSQL RDS database spanning hundreds (or thousands!) of instances.
+
+* Setup Tools
+
+We'll use the `aws`, `eksctl`, and `kubectl` command-line interfaces to create and setup our EKS and RDS instances, and to later deploy, configure, and scale our web app.
+
+Install the `aws` command-line tool:
+
+macOS + Linux:
 
     $ pip3 install awscli --upgrade --user
 
-- Windows
+Windows:
 
-[[https://docs.aws.amazon.com/cli/latest/userguide/install-windows.html#install-msi-on-windows][Download `.msi` file from AWS and install]]
+- [[https://docs.aws.amazon.com/cli/latest/userguide/install-windows.html#install-msi-on-windows][Download `.msi` file from AWS and install]]
 
-* Configure AWS CLI and Setup EKS Client
-
-Login and check that AWS CLI is working:
+Then, configure and check that `aws` is working:
 
     $ aws configure
     $ aws ec2 describe-regions 
 
-Unfortunately, different for Windows, macOS, and Linux:
+* Setup Tools (cont'd)
+
+Unfortunately the `eksctl` and `kubectl` installs are different for macOS, Linux, and Windows:
 
 - [[https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html][Follow instructions for setting up `eksctl` for your OS]]
+- [[https://kubernetes.io/docs/tasks/tools/install-kubectl/][Follow instructions for setting up `kubectl` for your OS]]
 
 Check `eksctl` is version `0.7.0` or higher:
 
     $ eksctl version
     [ℹ]  version.Info{BuiltAt:"", GitCommit:"", GitTag:"0.7.0"}
 
-* Create VPC for EKS + RDS
+Check `kubectl` is version `v1.14.0` or higher:
 
-Need to set up private subnet so that EKS can speak with RDS instances:
+	$ kubectl version
+	Client Version: version.Info{Major:"1", Minor:"16", GitVersion:"v1.16.2", GitCommit:"c97fe5036ef3df2967d086711e6c0c405941e14b", GitTreeState:"clean", BuildDate:"2019-10-15T19:18:23Z", GoVersion:"go1.12.10", Compiler:"gc", Platform:"linux/amd64"}
+	Server Version: version.Info{Major:"1", Minor:"14+", GitVersion:"v1.14.6-eks-5047ed", GitCommit:"5047edce664593832e9b889e447ac75ab104f527", GitTreeState:"clean", BuildDate:"2019-08-21T22:32:40Z", GoVersion:"go1.12.9", Compiler:"gc", Platform:"linux/amd64"}
+
+* Notes on Joining EKS and RDS Networks
+
+Enabling EKS to speak to RDS requires a bit of work, but is fairly simple. Essentially, we create a private network that routes traffic between the EKS and RDS networks. 
+
+On AWS, this is accomplished by using the Virtual Private Cloud (VPC) service. When an EKS cluster is created, it is given its own private network that can be peered with any VPC instance. And, when an RDS instance is created, you can also assign it a VPC network that you have created. 
+
+As such, we will create a VPC and assign it to RDS when we create the RDS instance, carefully choosing a network space that will not clash with the EKS network space. We will then peer the RDS and EKS networks using the created VPC.
+
+We will configure RDS instances to use the `10.0.0.0/24` network, and we'll leave EKS to use the default `192.168.0.0/24` network.
+
+* Create VPC for RDS to Peer with EKS
+
+Create a private VPC, that will be assigned to a RDS instance we will create later: 
 
     $ aws ec2 create-vpc \
         --cidr-block 10.0.0.0/24
 
-The above will output `VpcId`, save it for use later:
+The above will show a `VpcId`, save it for use later:
 
     $ export RDSVPCID="vpc-05be9f2c8868bcd51"
 
 * Create VPC Subnets
 
-Need to create two subnets (in different availability zones) for use with RDS:
+RDS requires a subnet for each availability zone RDS instances will be created in. Create two subnets on the VPC, one for each availability zone we will use:
 
     $ aws ec2 create-subnet \
         --vpc-id "$RDSVPCID" \
@@ -189,60 +266,64 @@ Need to create two subnets (in different availability zones) for use with RDS:
         --availability-zone ap-southeast-1b \
         --cidr-block 10.0.0.128/25
 
-Each command above produces a `SubnetId`, save them for use later:
+Each of the above will show a `SubnetId`, save them for use later:
 
-    $ export SUBNETID1="subnet-0cc1c35847d811c3a"
-    $ export SUBNETID2="subnet-0759e1197b51559b1"
+    $ export RDSSUBNETID1="subnet-0cc1c35847d811c3a"
+    $ export RDSSUBNETID2="subnet-0759e1197b51559b1"
+
+*Note*: We're splitting each AZ's subnet into `/25` so that a `/24` can be easily routed from EKS to RDS. When using more availability zones for RDS, choose a network route and mask that makes the most sense for your configuration.
 
 * Associate Subnets with VPC
 
-Created subnets need to be associated with the VPC.
+The route table for the VPC needs to be associated with the created subnets.
 
 First, grab the route table for the created VPC:
 
     $ aws ec2 describe-route-tables \
         --filters Name=vpc-id,Values="$RDSVPCID"
 
-The above will display the `RouteTableId`, save it for use later:
+The above will show a `RouteTableId`, save it for use later:
 
     $ export RDSROUTETABLEID="rtb-0fb6edab7ef1496b7"
 
-Second, associate the two created subnets with the route table:
+Next, associate the created subnets with the route table:
 
     $ aws ec2 associate-route-table \
         --route-table-id "$RDSROUTETABLEID" \
-        --subnet-id "$SUBNETID1"
+        --subnet-id "$RDSSUBNETID1"
     $ aws ec2 associate-route-table \
         --route-table-id "$RDSROUTETABLEID" \
-        --subnet-id "$SUBNETID2"
+        --subnet-id "$RDSSUBNETID2"
 
 * Create Subnet Group for RDS
 
-For RDS databases to speak to cluster nodes, RDS needs a subnet group:
+The created subnets need to be added to a single subnet group.
+
+Create the subnet group associated with the created subnets:
 
     $ aws rds create-db-subnet-group \
         --db-subnet-group-name "test-subnet-group" \
         --db-subnet-group-description "test-subnet-group-description" \
-        --subnet-ids "$SUBNETID1" "$SUBNETID2"
+        --subnet-ids "$RDSSUBNETID1" "$RDSSUBNETID2"
 
 * Create VPC Security Group
 
-The VPC needs a security group with that the RDS and EKS clusters can be
-associated with:
+We need a security group that can be associated with the created VPC, so that we can set network security policies for the joined EKS and RDS networks.
+
+Create the security group:
 
     $ aws ec2 create-security-group \
         --group-name "test-security-group" \
         --description "test-security-group-description" \
         --vpc-id "$RDSVPCID"
 
-The above will produce a `GroupId`, save it for use later:
+The above will show a `GroupId`, save it for use later:
 
     $ export SECURITYGROUPID="sg-0f80ba8efa2824209"
 
 * Create RDS Cluster
 
-After successfully creating the subnets and security groups, we can create the
-actual RDS PostgreSQL instance:
+After creating the subnets and security groups, we can (finally) create an RDS instance using the created security and subnet groups:
 
     $ aws rds create-db-instance \
         --engine postgres \
@@ -259,7 +340,7 @@ actual RDS PostgreSQL instance:
 
 * Create Elastic Kubernetes Service (EKS) Cluster
 
-Create a EKS cluster:
+Now, we can create our EKS cluster:
 
     $ eksctl create cluster \
         --name test-cluster \
@@ -271,42 +352,49 @@ Create a EKS cluster:
         --nodes-max 4 \
         --node-ami auto
 
-Check cluster is up:
+Alternately, if we already have a working EKS cluster, we can use `eksctl` to setup the credentials for use with `kubectl`:
 
-    $ kubectl get nodes
+    $ eksctl utils write-kubeconfig \
+        --name test-cluster
 
-*Note:* Creation can take 15+ minutes to complete. 
+*Note:* Creating a new EKS cluster can take 15+ minutes to complete. 
 
 * Test EKS Cluster
 
-Test with a `busybox` image:
+First, let's check the status of our EKS nodes, to verify we're able to speak to the EKS cluster with `kubectl`:
+
+    $ kubectl get nodes
+
+Then, let's test a `busybox` image to verify we can launch a pod:
 
     $ kubectl run test-busybox \
         --rm --tty --stdin \
         --image=busybox \
         --restart=Never -- sh
 
-* Bridge EKS and RDS VPCs
+* Join EKS and RDS over VPC
+
+We now need to join the EKS and RDS networks, via the VPC.
 
 First, list active VPCs:
 
     $ aws ec2 describe-vpcs
 
-The above should list a `VpcId` for each VPC. Find the one for the created
-EKS cluster (ie, the one with CIDR of `192.168.0.0/16`), and save for
-use later:
+The above will show a `VpcId` for each VPC. 
+
+Find the one for the EKS cluster (ie, the one with CIDR of `192.168.0.0/16`), and save for use later:
 
     $ export EKSVPCID="vpc-0eba65043a65fcc6e"
 
-Then, create a peering connection for EKS and RDS VPCs:
+Then, create a peering connection for EKS to the RDS VPC:
 
     $ aws ec2 create-vpc-peering-connection \
         --vpc-id "$EKSVPCID" \
         --peer-vpc-id "$RDSVPCID"
 
-* Bridge EKS and RDS VPCs (cont'd)
+* Join EKS and RDS over VPC (cont'd)
 
-The previous command will produce a `VpcPeeringConnectionId`, save it for use later:
+The previous command will show a `VpcPeeringConnectionId`, save it for use later:
 
     $ export VPCPEERINGID="pcx-0287805248bc7ca9d"
 
@@ -320,7 +408,7 @@ Next, grab the public route table of the EKS cluster:
     $ aws ec2 describe-route-tables \
         --filters Name="tag:aws:cloudformation:logical-id",Values="PublicRouteTable"
 
-The above will produce a `RouteTableId`, save it for use later:
+The above will show a `RouteTableId`, save it for use later:
 
     $ export EKSROUTETABLEID="rtb-010fc5edd9461fc32"
 
@@ -352,7 +440,7 @@ First, find the RDS endpoint:
 
     $ aws rds describe-db-instances
 
-The above should produce the RDS instance endpoint `Address`, save it for use later:
+The above should show the RDS instance endpoint `Address`, save it for use later:
 
     $ export RDSENDPOINT="test-postgres-instance.ce0k8zllu17k.ap-southeast-1.rds.amazonaws.com"
 
@@ -397,7 +485,7 @@ Last, check tables exist, and then quit using `\q`:
 We need to login to the ECR so that we can push private images that can be used
 by EKS.
 
-Linux + macOS:
+macOS + Linux:
 
     $ eval $(aws ecr get-login --no-include-email)
     WARNING! Using --password via the CLI is insecure. Use --password-stdin.
@@ -422,7 +510,7 @@ We now need to create a ECR repository where we can push our `sample-api` images
     $ aws ecr create-repository \
         --repository-name mycompany/sample-api
 
-The above will outputs `repositoryUri`, save it for use later:
+The above will show a `repositoryUri`, save it for use later:
 
     $ export REPOSITORYURI=143383525987.dkr.ecr.ap-southeast-1.amazonaws.com/mycompany/sample-api
 
@@ -463,8 +551,7 @@ Get exposed service:
 
     $ kubectl get svc
 
-The above will output the `EXTERNAL-IP` of the Elastic Load Balancer (ELB)
-created by the manifest. Save it for use later:
+The above will output the `EXTERNAL-IP` of the Elastic Load Balancer (ELB) created by the manifest. Save it for use later:
 
     $ export SAMPLEHOST=a20d395f6f4b311e9b0c8021872af61f-898129700.ap-southeast-1.elb.amazonaws.com
 
@@ -484,7 +571,7 @@ Delete an author:
 
 * Scaling to Infinity
 
-* Add Nodes to the Cluster
+* Scale Up Cluster and Pods 
 
 We only created a minimal cluster, so lets make it bigger by adding more nodes:
 
@@ -493,7 +580,7 @@ We only created a minimal cluster, so lets make it bigger by adding more nodes:
         --name standard-workers \
         --nodes 5
 
-Check that the nodes are added to the cluster, and to load balancer:
+Check that the nodes are added to the cluster, and associated with the load balancer:
 
     $ kubectl get nodes -o wide
     $ kubectl describe svc sample-api-lb
@@ -547,18 +634,28 @@ Verify new API works:
 
     $ curl -d '{ ... }'
 
-* Q&A
-
 * Brankas is Hiring!
 
 Brankas is hiring for all positions:
 
 - Country Manager (Indonesia)
 - Sales and Marketing
-- Solutions Architect
+- Solution Architects
+- Engineering Managers
 - Backend/Frontend Engineers
-- Site Reliability Engineers
+- Platform and Site Reliability Engineers
 - Business Analysts
 - QA
 
 Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background brankas-hiring.png
+
+* Misc Commands
+
+Setup credentials for an EKS cluster:
+
+    $ eksctl utils write-kubeconfig \
+        --name test-cluster
+
+* Q&A

@@ -15,7 +15,7 @@ import (
 
 var (
 	flagListen = flag.String("l", "0.0.0.0:8080", "listen")
-	flagDB     = flag.String("db", "pg://postgres:P4ssw0rd@localhost", "database")
+	flagDB     = flag.String("db", "pg://postgres:P4ssw0rd@localhost?sslmode=disable", "database")
 )
 
 func main() {
