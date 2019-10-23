@@ -168,8 +168,6 @@ Then, run the image locally for testing:
         --publish 8080:8080 \
         sample-api
 
-* Deploying on Amazon Web Services
-
 * Brankas is Hiring!
 
 Brankas is hiring for all positions:
@@ -186,6 +184,8 @@ Brankas is hiring for all positions:
 Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
 
 .background brankas-hiring.png
+
+* Deploying on Amazon Web Services
 
 * Scalable Overview
 
@@ -657,12 +657,5 @@ Brankas is hiring for all positions:
 Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
 
 .background brankas-hiring.png
-
-* Misc Commands
-
-Setup credentials for an EKS cluster:
-
-    $ eksctl utils write-kubeconfig \
-        --name test-cluster
 
 * Q&A
