@@ -11,9 +11,6 @@ fi
 set -e -x
 
 usql $DB \
-  -c "DROP DATABASE IF EXISTS booktest"
-
-usql $DB \
   -f $SRC/schema.sql
 
 xo $DB \

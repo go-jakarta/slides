@@ -372,9 +372,9 @@ Then, let's test a `busybox` image to verify we can launch a pod:
         --image=busybox \
         --restart=Never -- sh
 
-* Join EKS and RDS over VPC
+* Peer EKS and RDS VPCs
 
-We now need to join the EKS and RDS networks, via the VPC.
+We now need to peer the EKS and RDS VPCs, which means creating (and then accepting) a peering connection request from the EKS to RDS VPCs.
 
 First, list active VPCs:
 
@@ -392,7 +392,7 @@ Then, create a peering connection for EKS to the RDS VPC:
         --vpc-id "$EKSVPCID" \
         --peer-vpc-id "$RDSVPCID"
 
-* Join EKS and RDS over VPC (cont'd)
+* Peer EKS and RDS VPCs (cont'd)
 
 The previous command will show a `VpcPeeringConnectionId`, save it for use later:
 
@@ -403,7 +403,11 @@ Accept the VPC peering connection:
     $ aws ec2 accept-vpc-peering-connection \
         --vpc-peering-connection-id "$VPCPEERINGID"
 
-Next, grab the public route table of the EKS cluster:
+* Create Routes for EKS and RDS VPCs
+
+We now will need to create routes between the EKS and RDS VPCs.
+
+First, grab the public route table of the EKS cluster:
 
     $ aws ec2 describe-route-tables \
         --filters Name="tag:aws:cloudformation:logical-id",Values="PublicRouteTable"
@@ -412,9 +416,9 @@ The above will show a `RouteTableId`, save it for use later:
 
     $ export EKSROUTETABLEID="rtb-010fc5edd9461fc32"
 
-* Route Traffic and Authorize Ingress from EKS to RDS
+* Create Routes for EKS and RDS VPCs (cont'd)
 
-Create routes for EKS to RDS and for RDS to EKS:
+Now, create routes for EKS to RDS and for RDS to EKS:
 
     $ aws ec2 create-route \
         --route-table-id "$EKSROUTETABLEID" \
@@ -426,13 +430,15 @@ Create routes for EKS to RDS and for RDS to EKS:
         --vpc-peering-connection-id "$VPCPEERINGID" \
         --destination-cidr-block 192.168.0.0/16 
 
-Then, authorize ingress from EKS to RDS:
+Finally, authorize ingress from EKS using the security group we created for RDS:
 
     $ aws ec2 authorize-security-group-ingress \
         --group-id "$SECURITYGROUPID" \
         --protocol tcp \
         --port 5432 \
         --cidr 192.168.0.0/16
+
+Now pods running on EKS should be able to connect to the RDS instances directly.
 
 * Grab RDS Endpoint for Manifest
 
@@ -463,7 +469,7 @@ Then, from within the launched pod, test connectivity to RDS with `\dt` metacomm
 
 Then, copy and paste schema into `postgres=>` prompt.
 
-- Surely better ways to apply schema to RDS, but there was not have enough time to research the best way to do that for AWS
+- Surely better ways to apply schema to RDS, but there was not enough time to research the best way to do that for AWS
 
 * Check Tables Exist
 
@@ -601,26 +607,27 @@ Update manifest to increase replicas:
 
 * Update and Rollout New Version
 
-Let's update our app and demonstrate how to rollout a new version.
+Let's update our app and demonstrate how to rollout a new version. 
+
+We'll add a simple `/books` endpoint to our `sample-api` web app that retrieves a list of all books in the database.
 
 * Build, Tag and Push to Registry
 
-Build new image with Docker.
+After we've completed our changes, we build new image with Docker:
 
     $ docker build -t sample-api .
 
-Tag a new version:
+Then, tag a new version:
 
     $ docker tag sample-api:latest $REPOSITORYURI:v2
 
-Push to registry:
+And finally, push to the container registry:
 
     $ docker push $REPOSITORYURI:v2
 
 * Rollout New Deployment Image
 
-After we've pushed the new version of the app, we can roll out updated version
-to a deployment with `kubectl`:
+After we've pushed the new version of the app, we can roll out the updated version set in the deployment with `kubectl`:
 
     $ kubectl set image deployment \
         sample-api-deployment \
@@ -632,7 +639,7 @@ Check on the deployment:
 
 Verify new API works:
 
-    $ curl -d '{ ... }'
+    $ curl http://$SAMPLEHOST:8080/books
 
 * Brankas is Hiring!
 
