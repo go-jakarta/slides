@@ -1,0 +1,221 @@
+Building Microservices with Gunk
+GopherCon Vietnam 2019
+
+Kenneth Shaw
+ken@brank.as
+
+2 November 2019
+
+Tags: golang, grpc, microservices, gunk, protobuf
+
+* Gunk
+
+.background ../gopher-gojakarta.png
+
+* Slides
+
+Slides are available online!
+
+    $ go get -u gophers.id/slides
+
+* Protocol Buffers Overview
+
+Protocol Buffers ("protobuf") refers to a number of related technologies:
+
+- An Interface Description Language (IDL), known as proto2/proto3 and used for defining services/messages
+- A command-line `protoc` compiler/toolchain and additional `protoc-*` code generators that process the service/message definitions and emit code
+- Standardized marshaling/unmarshaling libraries for encoding/decoding protobuf messages
+
+Protobuf doesn't force a specific _implementation_ of services, instead leaving that to code generators. 
+
+* gRPC Overview
+
+gRPC is a RPC implementation based on top of HTTP/2 that uses protobuf for defining services/messages:
+
+- Built by Google
+- Fast, secure, efficient
+- Stream-based
+
+gRPC over the last few years has become the de-facto / preferred way to define build services (micro or otherwise):
+
+- Well-defined/understood 1:1 REST mappings
+- Enables developers to focus on building services, without getting bogged down by message exchange details
+
+Many modern technology companies are building APIs and services leveraging gRPC for microservices based architectures.
+
+* Services at Brankas
+
+At [[https://brank.as][Brankas]], 100% of our APIs are developed in Go, using gRPC with services exposed via a REST gateway (if necessary).
+
+Originally: 
+
+- Many different API and protobuf service definitions spread across multiple repositories
+- Each repository contained a unique, ad-hoc mechanism for code generation: Makefiles, shell scripts, manual, ...
+- Definitions were inconsistent, non-hierarchial, and haphazardly organized
+
+* Problems at Brankas
+
+New hires at Brankas were often new to both Go and gRPC/protobuf: 
+
+- Increased mental exhaustion/cognitive load to learn each additional technology
+- Measurable delay getting "up-to-speed"
+
+And the chaotic organization (or lack thereof) of protobuf definitions in our projects had other side-effects:
+
+- Difficult to standardize CI/CD pipelines
+- Developers could inadvertently forget to generate requisite artifacts/dependencies causing other breaks
+
+* At a Snail's Pace
+
+Effectively every project was a unique snowflake and it didn't help that protobuf was yet "one more thing":
+
+- Senior engineers frustrated waiting for new hires to become acquainted with the systems, tools, and technologies in use
+- Became increasingly more difficult to manage and deploy new services as architecture and services complexity grew
+- Developer confusion and disgreement when adding new services (ie, should copy project A v1, A v3, B v2, ...?)
+
+In early 2018, it was clear that it was time to fix our workflow and standardize across the rapidly growing set of projects and services, before letting it become more chaotic than it already was.
+
+* Moving Faster
+
+We realized that the problems at [[https://brank.as/][Brankas]] weren't just unique to our organization, and it was likely that the growing community of developers working (almost exclusively) with Go/gRPC/Protobuf also faced the same challenges.
+
+And we had an epiphany -- we realized that with a single Go-derived tool, we could:
+
+- Standardize code generation
+- Eliminate dependencies on protoc completely (in some cases)
+- Reduce the cognitive load of needing to learn the proto3 syntax and toolchains
+
+[[https://github.com/gunk/gunk][Gunk]] was born.
+
+* Gunk Overview
+
+Gunk is a modern frontend and and syntax for Google's Protocol Buffers.
+
+- Provides a simpler, easier to understand, Go-derived syntax for defining protobufs
+- Interoperates with `protoc-*` generators
+- Additional "modern" tools: auto code formatting, protobuf conversion, doc lookup, and more!
+
+Reduces cognitive load for developers:
+
+- Opinionated, standardized project based builds
+- Developers new to Go and defining services in protobuf, do not need to learn additional IDL syntax ("just use Go")
+
+In my (biased) opinion, significantly better experience using Gunk than standard protobuf!
+
+* A Word on Protocol Buffers
+
+Need to emphasize *profusely* there is nothing _wrong_ nor _deficient_ with standard protobuf syntax/definitions: protobuf works just fine!
+
+We just have released the solution that has worked for us, in the hopes that other developers in the community might also find it useful.
+
+* And yet ...
+
+.background standards.png
+
+* Comparison to Go
+
+Gunk's syntax and workflow is rooted in Go:
+
+- Command-line is meant to be familiar to Go developers
+- Uses $GOPATH + URL style package imports
+- Uses go modules for dependency management / versioning of service definitions
+
+Has same canonical mapping of protobuf types to the types used Go code generators:
+
+- Services defined as interfaces
+- Messages defined as structs
+- Options can be any Go type (ie, a struct) 
+- Option declarations use a special `+gunk`<expression>` syntax in the doccomment proceeding any interface, struct, type, or field
+
+* Example Service
+
+.code v1/util/echo.gunk /echo.gunk/,/ENDTYPES/
+
+* Example Service (cont'd)
+
+.code v1/util/echo.gunk /CheckStatusResponse/,/Echo\(/
+
+* Example Service (cont'd)
+
+.code v1/util/echo.gunk /START/,/END/
+
+* Configuration
+
+Gunk uses a simple configuration file called `.gunkconfig` located in the project (repository) root:
+
+.code .gunkconfig
+
+Each `[generate`<type>]` stanza in the above maps to an invocation of the `protoc-gen-<type>` code generator.
+
+* Code Generation
+
+Gunk uses Go package naming/repositories/paths:
+
+    # retrieve the code
+    $ go get -u github.com/gophers.id/slides
+    $ cd $GOPATH/src/gophers.id/slides/28-gunk
+
+    # generate the definitions
+    $ gunk generate ./...
+    
+    # alternately
+    $ gunk generate ./v1/util
+
+* Example Server
+
+The following example is a gRPC based, but Gunk will work equally well with Twirp, or any other other RPC mechanism that uses protobuf for service/message definition.
+
+.code main.go /package/,/^\)/
+
+* Example Server (cont'd)
+
+.code main.go /Server/,/ENDSERVER/
+
+* Example Server (cont'd)
+
+.code main.go /func main/,/^}/
+
+To build/run:
+
+    $ go build -o server main.go
+    $ ./server
+
+* Practical Example
+
+Add a new API endpoint.
+
+* Other Features
+
+Gunk also has a bevy of cool features:
+
+- Convert existing `.proto` files to `.gunk` files with `gunk convert`
+- Format `.gunk` files (like `gofmt`) with `gunk format`
+- Extract protobuf definitions from server implementations with `gunk extract` (upcoming)
+
+* Future
+
+Gunk is still early in its development, but we have an exciting number of useful / cool features on the roadmap:
+
+- Eliminate need for the `protoc` compiler completely
+- Standardize protobuf options in the `github.com/gunk/opt` namespace, and support most of the common generators such as the Lyft validator
+- Allow for inline definition of Gunk annotations in Go source code
+- Auto update/synchronize definitions
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions:
+
+- Country Manager (Indonesia)
+- Sales and Marketing
+- Solution Architects
+- Engineering Managers
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- Business Analysts
+- QA
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background ../gopher-brankas-hiring.png
+
+* Q&A

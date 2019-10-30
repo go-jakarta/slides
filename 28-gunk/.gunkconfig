@@ -1,0 +1,15 @@
+; $GOPATH/src/gophers.id/slides/28-gunk/.gunkconfig
+
+; generate go libs, with grpc plugins
+[generate go]
+	plugins=grpc
+
+; generate js libs
+[generate js]
+
+; generate python libs
+[generate python]
+
+; generate swagger configs, writing files to .
+[generate swagger]
+	out=.
