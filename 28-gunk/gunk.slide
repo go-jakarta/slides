@@ -117,14 +117,14 @@ We just have released the solution that has worked for us, in the hopes that oth
 Gunk's syntax and workflow is rooted in Go:
 
 - Command-line is meant to be familiar to Go developers
-- Uses $GOPATH + URL style package imports
-- Uses go modules for dependency management / versioning of service definitions
+- Uses `$GOPATH` + URL style package imports
+- Uses Go modules for dependency management / versioning of service definitions
 
 Has same canonical mapping of protobuf types to the types used Go code generators:
 
-- Services defined as interfaces
-- Messages defined as structs
-- Options can be any Go type (ie, a struct) 
+- Services defined with `interface{}`
+- Messages defined as a `struct`
+- Options can be any Go `type` (ie, a `struct`) 
 - Option declarations use a special `+gunk`<expression>` syntax in the doccomment proceeding any interface, struct, type, or field
 
 * Example Service
@@ -155,15 +155,25 @@ Gunk uses Go package naming/repositories/paths:
     $ go get -u github.com/gophers.id/slides
     $ cd $GOPATH/src/gophers.id/slides/28-gunk
 
+    # install protoc-* generators
+    $ go install \
+        github.com/golang/protobuf/protoc-gen-go \
+        github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway \
+        github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+
     # generate the definitions
     $ gunk generate ./...
     
     # alternately
     $ gunk generate ./v1/util
 
+    $ ls && ls v1/util
+    all.swagger.json  go.mod  go.sum  gunk.slide  main.go  standards.png  tools.go  v1
+    all_pb2.py  all.pb.go  checkstatusresponse.js  echo.gunk  message.js  status.js  updatestatusrequest.js  updatestatusresponse.js
+
 * Example Server
 
-The following example is a gRPC based, but Gunk will work equally well with Twirp, or any other other RPC mechanism that uses protobuf for service/message definition.
+The following example is a gRPC server, but Gunk will work equally well with Twirp, or any other other RPC mechanism that uses protobuf for service/message definition.
 
 .code main.go /package/,/^\)/
 
@@ -175,10 +185,14 @@ The following example is a gRPC based, but Gunk will work equally well with Twir
 
 .code main.go /func main/,/^}/
 
-To build/run:
+Build, run, test:
 
     $ go build -o server main.go
-    $ ./server
+    $ ./server &
+    $ grpcurl -plaintext 127.0.0.1:9090 util.Util.CheckStatus
+    {
+      "Status": "OK"
+    }
 
 * Practical Example
 

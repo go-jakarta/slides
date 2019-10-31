@@ -5,7 +5,6 @@ require (
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/bmatcuk/doublestar v1.1.5 // indirect
 	github.com/emicklei/proto v1.8.0 // indirect
-	github.com/golang/lint v0.0.0-20180702182130-06c8688daad7 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/grpc-ecosystem/grpc-gateway v1.11.3
 	github.com/gunk/gunk v0.2.0

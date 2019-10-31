@@ -9,6 +9,7 @@ import (
 
 	goog "github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	pb "gophers.id/slides/28-gunk/v1/util"
 )
@@ -42,5 +43,6 @@ func main() {
 	}
 	s := grpc.NewServer()
 	pb.RegisterUtilServer(s, &Server{})
+	reflection.Register(s)
 	log.Fatal(s.Serve(l))
 }
