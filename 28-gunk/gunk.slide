@@ -202,9 +202,9 @@ Add a new API endpoint.
 
 Gunk also has a bevy of cool features:
 
-- Convert existing `.proto` files to `.gunk` files with `gunk convert`
-- Format `.gunk` files (like `gofmt`) with `gunk format`
-- Extract protobuf definitions from server implementations with `gunk extract` (upcoming)
+- Convert existing `.proto` files to `.gunk` files with `gunk`convert`
+- Format `.gunk` files (like `gofmt`) with `gunk`format`
+- Extract protobuf definitions from server implementations with `gunk`extract` (upcoming)
 
 * Future
 
