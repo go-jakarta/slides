@@ -142,7 +142,7 @@ Has same canonical mapping of protobuf types to the types used Go code generator
 - Services defined with `interface{}`
 - Messages defined as a `struct`
 - Options can be any Go `type` (ie, a `struct`) 
-- Option declarations use a special `+gunk`<expression>` syntax in the doccomment proceeding any interface, struct, type, or field
+- Option declarations use a special `+gunk`<expression>` syntax in the doccomment proceeding any `interface`, `struct`, `type`, or field
 
 * Example Service
 
