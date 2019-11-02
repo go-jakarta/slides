@@ -53,7 +53,7 @@ gRPC is a RPC implementation based on top of HTTP/2 that uses protobuf for defin
 - Fast, secure, efficient
 - Stream-based
 
-gRPC over the last few years has become the de-facto / preferred way to define build services (micro or otherwise):
+gRPC over the last few years has become the de-facto / preferred way to define and build services (micro or otherwise):
 
 - Well-defined/understood 1:1 REST mappings
 - Enables developers to focus on building services, without getting bogged down by message exchange details
@@ -172,8 +172,9 @@ Gunk uses Go package naming/repositories/paths:
     $ go get -u github.com/gophers.id/slides
     $ cd $GOPATH/src/gophers.id/slides/28-gunk
 
-    # install protoc-* generators
+    # install gunk and protoc-* generators
     $ go install \
+        github.com/gunk/gunk \
         github.com/golang/protobuf/protoc-gen-go \
         github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway \
         github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
