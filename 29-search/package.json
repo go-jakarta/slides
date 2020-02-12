@@ -1,0 +1,13 @@
+{
+  "name": "29-search",
+  "description": "29-search app",
+  "license": "UNLICENSED",
+  "private": true,
+  "browserslist": [
+    "> 5%"
+  ],
+  "cacheDirectories": [
+    ".cache"
+  ],
+  "dependencies": {}
+}
