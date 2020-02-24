@@ -1,0 +1,34 @@
+version: '3'
+services:
+  search:
+    build:
+      context: .
+      dockerfile: Dockerfile.search
+    restart: always
+    ports:
+      - 127.0.0.1:3000:3000
+    networks:
+      - search-net
+    environment:
+      - LISTEN=:3000
+      - DB=postgres://search:search@search-db:5432/search?sslmode=disable
+      - SECRET=pihBpVodnfNHBBxSy1fK520d
+  search-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    restart: always
+    ports:
+      - 127.0.0.1:5432:5432
+    networks:
+      - search-net
+    environment:
+      - POSTGRES_USER=search
+      - POSTGRES_PASSWORD=search
+    volumes:
+      - search-postgresql:/var/lib/postgresql/data
+networks:
+  search-net:
+    driver: bridge
+volumes:
+  search-postgresql:

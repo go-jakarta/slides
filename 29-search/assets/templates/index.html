@@ -1,0 +1,19 @@
+{% code
+  type IndexPage struct { }
+%}
+{% stripspace %}
+{% func (p *IndexPage) Name() %}index{% endfunc %}
+{% func (p *IndexPage) Title() %}Search IMDb{% endfunc %}
+{% func (p *IndexPage) Content() %}
+<div class="jumbotron">
+  <h1 class="display-3">Search IMDb</h1>
+  <p>
+    <form action="/find">
+      <label for="q">Find</label>
+      <input name="q" placeholder="Something..."/>
+      <button type="submit">Search!</button>
+    </form>
+  </p>
+</div>
+{% endfunc %}
+{% endstripspace %}

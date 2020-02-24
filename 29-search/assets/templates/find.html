@@ -1,0 +1,32 @@
+{% code
+  type FindPage struct {
+    Results []Result
+  }
+%}
+{% stripspace %}
+{% func (p *FindPage) Name() %}find{% endfunc %}
+{% func (p *FindPage) Title() %}Search IMDb{% endfunc %}
+{% func (p *FindPage) Content() %}
+<div class="jumbotron">
+  <h1 class="display-3">IMBb Results ({%d= len(p.Results) %})</h1>
+  <p>
+    <form action="/find">
+      <label for="q">Find</label>
+      <input name="q" placeholder="Something..."/>
+      <button type="submit">Search!</button>
+    </form>
+  </p>
+</div>
+<div class="">
+  {% for _, r := range p.Results %}
+    <div>
+      <p>{%s= r.PageID %} <a href={%s= r.Location %}>{%s= r.Title %}</a> ({%f= r.Rank %})</p>
+      <span>
+        {%s= r.Summary %}
+      </span>
+    </div>
+  {% endfor %}
+  </div>
+{% endfunc %}
+{% endstripspace %}
+

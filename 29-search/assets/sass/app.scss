@@ -1,0 +1,10 @@
+/* special font variable handling */
+$web-font-path: "";
+@import "../fonts/raleway/raleway";
+
+$font-family-serif: Raleway, Georgia, Cambria, "Times New Roman", Times, serif;
+$headings-font-family: $font-family-serif;
+
+@import "bootswatch/dist/litera/variables";
+@import "bootstrap/scss/bootstrap";
+@import "bootswatch/dist/litera/bootswatch";

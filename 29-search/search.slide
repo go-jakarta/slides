@@ -1,0 +1,125 @@
+Building a Search Engine for Fun and Profit
+GoManila + ScaleJakarta, February 2020
+
+Kenneth Shaw
+ken@brank.as
+
+24 February 2020
+
+Tags: golang, search, microservices
+
+* Building a Search Engine for Fun and Profit
+
+.background ../gopher-gojakarta.png
+
+* First...
+
+Big thank you to [[https://www.xendit.com/][XendIt]] for hosting this event!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]]
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us:
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Vidya Winda Sari
+
+- [[mailto:vidya.winda@gmail.com][vidya.winda@gmail.com]]
+- [[tel:+62-812-8640-1328][+62-812-8640-1328]]
+
+* Next Meetup
+
+March 24th, 2020, topic/location: TBA
+
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions:
+
+- Country Manager (Indonesia)
+- Sales and Marketing
+- Solution Architects
+- Engineering Managers
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- Business Analysts
+- QA
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background ../gopher-brankas-hiring.png
+
+* Slides
+
+Slides are available online!
+
+    $ go get -u gophers.id/slides
+
+* Building a Search Engine for Fun and Profit
+
+.background ../gopher-gojakarta.png
+
+* Overview
+
+Will build a "search engine" that indexes a site, stores the results to a database.
+
+- Implementation as three "Microservices" (`search`, `crawl`)
+- "12-factor app"
+- Deploy locally and remotely using _same_ configuration
+- Run at "Google-scale"
+
+Services overview:
+
+- `search` - handles user searches (web page)
+- `crawl` - crawls a site and stores data in database
+
+* Development + Deployment
+
+Will use Docker to develop and maintain consistent environments:
+
+- Use `docker-compose` for local
+- Use `kubectl` for remote
+- Make/use persistent volumes
+
+Will deploy on Google Cloud (GCP), using Google Kubernetes Engine (GKE).
+
+- If enough time, attempt to show running at "Google-scale"
+
+* Structure
+
+Discuss structure of app:
+
+- Database schema, embedding in image
+
+* Search
+
+Discuss `search`:
+
+- Tour of source tree
+- Application structure
+
+* Crawl
+
+Discuss `crawl`:
+
+- Tour of source tree
+- Application structure

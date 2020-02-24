@@ -1,7 +1,11 @@
 /.cache/
 /search
 /search.exe
+/crawl
 /crawl.exe
+/index
+/index.exe
 /yarn-error.log
 /build
 .DS_Store
+/notes.txt
