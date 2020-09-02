@@ -1,0 +1,255 @@
+Dynamic GraphQL with Go
+GoJakarta + Google Developers Space (Singapore)
+
+Kenneth Shaw
+ken@brank.as
+
+2 September 2020
+
+Tags: golang, graphql, introspection, dynamic, query
+
+* Dynamic GraphQL with Go
+
+.background ../gopher-gojakarta.png
+
+* First...
+
+Big thank you to [[https://sites.google.com/view/devspace-sg][Google Developers Space (Singapore)]] for hosting this event!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]]
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us:
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Vidya Winda Sari
+
+- [[mailto:vidya.winda@gmail.com][vidya.winda@gmail.com]]
+- [[tel:+62-812-8640-1328][+62-812-8640-1328]]
+
+* Next Meetup
+
+Will be doing a joint meetup with GoKL and GoSingapore later this month! Stay tuned for details!
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions:
+
+- Sales and Marketing
+- Solution Architects
+- Engineering Managers
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- Business Analysts
+- QA
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background ../gopher-brankas-hiring.png
+
+* Slides
+
+Slides are available online!
+
+    $ go get -u gophers.id/slides
+
+* Dynamic GraphQL with Go
+
+.background ../gopher-gojakarta.png
+
+* Intro to GraphQL
+
+GraphQL is a query language designed "for your API", and initially built by Facebook circa 2015. GraphQL allows clients to dynamically build and send queries in a way that is meant to be forward and backwards compatible, and independent of the client's needs to format, model, and present the retrieved data. 
+
+GraphQL has been designed in such a way that uniquely solves the challenges of mobile and web apps, as GraphQL can greatly reduce (or possibly eliminate!) roundtrips to backends, reduces the total data transmitted, and does so in way that allows multiple deployed client versions to make use of the same endpoint. This enables highly decoupled frontends and backends, and in turn allows independent development teams to move faster.
+
+* GraphQL Overview
+
+GraphQL has a simple, human readable syntax for Schemas and Queries, and are built around a "graph" paradigm of data storage, structure, and retrieval. Query responses are returned as simple, JSON formatted data.
+
+Given a simple [[https://graphql.org][GraphQL schema]]:
+
+    type Project {
+      name: String
+      tagline: String
+      contributors: [User]
+    }
+
+* GraphQL Overview (cont'd)
+
+A query:
+
+    {
+      project(name: "GraphQL") {
+        tagline
+      }
+    }
+    
+Then, a GraphQL endpoint (populated with the requisite data) would respond with the following:
+
+    {
+      "project": {
+        "tagline": "A query language for APIs"
+      }
+    }
+
+Note the direct, practically _one-to-one_relationship_ between the query and the response.
+
+* More on GraphQL
+
+GraphQL allows clients to build dynamic queries, decoupled from the server implementation
+
+- Allows servers to enforce security and access policies, while still behaving in a highly dynamic fashion
+
+GraphQL queries are simple text they are as usable as SQL, and other types of query languages they can be built / sent by clients (including untrusted ones)
+
+- Clients/servers can be written in any programming language
+- Provides greater standardization for backends than REST/others might*
+- Web apps can build queries, and process responses with no additional libraries/code (others mechanisms require additional marshaling/unmarshaling by the client or server)
+
+_*Note:_debatable,_mileage_may_vary_
+
+* Dynamic GraphQL with Go
+
+As of September 2020, there are a number of freely available, maintained packages for processing GraphQL in Go:
+
+- [[https://github.com/graph-gophers/graphql-go][github.com/graph-gophers/graphql-go]] - well balanced, idiomatic and clean API
+- [[https://github.com/graphql-go/graphql][github.com/graphql-go/graphql]] - low level applications
+- [[https://github.com/samsarahq/thunder][github.com/samsarahq/thunder]] - higher level graphql servers
+- [[https://github.com/appointy/jaal][github.com/appointy/jaal]] - reflection based server builder
+
+* What Can We Do?
+
+Build a simple server and test:
+
+.code simple.go /package/,/MARK/
+
+* What Can We Do? (cont'd)
+
+.code simple.go /MARK/,/^}/
+
+Build and run:
+
+  $ cd $GOPATH/src/gophers.id/slides/30-graphql
+  $ go build -o simple simple.go && ./simple
+
+Test:
+
+  $ curl -X POST -d '{"query": "{ hello }"}' localhost:8080/query 
+  {"data":{"hello":"Hello, world!"}} 
+
+* Why is this useful?
+
+In roughly ~15 lines of code, we have a decoupled, fully forward/backward compatible server that can meet dynamic queries, and plug into Facebook's Relay, React/React Native, and many other frameworks in the Javascript ecosystem. When coupled properly with TypeScript, its possible to build fully dynamic (but type-safe!) clients and servers.
+
+This *is*not* signifcantly easier than gRPC, REST, or other client/server integration frameworks. It's just different, and has a number of tradeoffs in terms of performance (both on the client and server), data modeling, and more. 
+
+The real gains, however, are in allowing frontend teams to explore/experiment without requiring any significant (or any!) changes on the backend to accommodate new UI requirements or interfaces.
+
+* Social Example
+
+Let's step through the more complicated [[https://github.com/graph-gophers/graphql-go/blob/master/example/social/social.go][`social`]] example included in [[https://github.com/graph-gophers/graphql-go][`graph-gophers/graphql-go`]].
+
+* Introspection 
+
+Additionally, the [[https://github.com/graph-gophers/graphql-go][`graph-gophers/graphql-go`]] package exposes a general purpose parser and an introspection API (similiar to the Go `reflect` package) that can allow _end-users_ to specify how data is stored. This can create something like a "top-down" way to create or define database schemas.
+
+.code intro.go /START/,/END/
+
+* Introspection (cont'd)
+
+.code intro.go /END/,/^}/
+
+* Introspection (cont'd)
+
+  $ cd $GOPATH/src/gophers.id/slides/30-graphql
+  $ go build -o intro intro.go && ./intro
+  type: Boolean (SCALAR)
+  type: Float (SCALAR)
+  type: ID (SCALAR)
+  type: Int (SCALAR)
+  type: Org (OBJECT)
+  type: Query (OBJECT)
+  type: String (SCALAR)
+  type: Time (SCALAR)
+  type: User (OBJECT)
+  type: __Directive (OBJECT)
+  type: __DirectiveLocation (ENUM)
+  type: __EnumValue (OBJECT)
+  type: __Field (OBJECT)
+  type: __InputValue (OBJECT)
+  type: __Schema (OBJECT)
+  type: __Type (OBJECT)
+  type: __TypeKind (ENUM)
+  query:
+   field: user
+
+* Dynamic Tables
+
+Building on the previous introspection examples, let's step through `intro.go` to see how we can combine introspection of GraphQL queries to interface with dynamic SQL databases and queries.
+
+* Dynamic Tables (cont'd)
+
+Schema:
+
+.code sqlite.go /START1/,/END1/
+
+* Dynamic Tables (cont'd)
+
+Table creation:
+
+.code sqlite.go /START2/,/END2/
+
+* Dynamic Tables (cont'd)
+
+.code sqlite.go /START3/,/END3/
+
+* Dynamic Tables (cont'd)
+
+Build + Run:
+
+  $ go build -o sqlite sqlite.go && ./sqlite 
+  2020/09/02 11:38:28 adding Org (OBJECT):
+  create table Org (
+    name text
+  )
+  2020/09/02 11:38:28 adding User (OBJECT):
+  create table User (
+    id text,
+    email text,
+    name text,
+    dob text,
+    orgs text
+  )
+
+* Dynamic Tables (cont'd)
+
+Test:
+
+  $ curl -X POST -d '{"query": "{ orgs(name: \"org1\") { name } }"}' localhost:8080/query 
+  {"data":{"orgs":[{"name":"org1"}]}}
+
+* Where to Go From Here
+
+Using Go's `reflect` package, it would be possible to create an entirely dynamic responder based on introspected schemas. 
+
+These could then be used internally, either in a Go app, or exposed to a mobile app or browser using Facebook Relay, or other GraphQL based frameworks/languages.
