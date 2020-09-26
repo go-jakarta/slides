@@ -1,0 +1,318 @@
+Plugin Patterns with Go
+GoJakarta + GoSEA 
+
+Kenneth Shaw
+ken@brank.as
+
+26 September 2020
+
+Tags: go, golang, plugin, module
+
+* Plugin Patterns with Go
+
+.background ../gopher-gojakarta.png
+
+* First...
+
+Big thank you to [[https://sites.google.com/view/devspace-sg][Google Developers Space (Singapore)]] for hosting this event!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]]
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us:
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Vidya Winda Sari
+
+- [[mailto:vidya.winda@gmail.com][vidya.winda@gmail.com]]
+- [[tel:+62-812-8640-1328][+62-812-8640-1328]]
+
+* Next Meetup
+
+Looking at a joint meetup with Tokopedia in late October!
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions!
+
+Especially Senior + Junior:
+
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- QA
+
+And, of course:
+
+- Product, Project, and Engineering Managers
+- Sales and Marketing
+- Solution Architects
+- Business Analysts
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background ../gopher-brankas-hiring.png
+
+* Slides
+
+Slides are available online!
+
+    $ go get -u gophers.id/slides
+
+* Plugin Patterns with Go
+
+.background ../gopher-gojakarta.png
+
+* Plugins and Go
+
+Most common approaches to plugins with Go:
+
+- Package specific interface(s)
+- A shared `struct` containing all `func` members or other options
+- Using standard library's `reflect` to load `func` / `type` signatures, with metadata (options) defined in `struct` tags
+- Socket/pipe based typically with a parent process delegating to a child or via TCP/Unix sockets or Unix pipes. Most likely uses a higher-level framework or encoding such as gRPC, JSON-RPC, or others
+- Dynamic loaded, statically compiled code (using `.so` or `.dll` files)
+
+* Popular Go Apps with Plugins
+
+We'll go through a few popular Go applications/packages that support plugins, and take a look at the different approaches.
+
+- Standard library's `database/sql` and related drivers
+- `logrus`
+- `usql` (!)
+- Kubernetes
+
+* Standard Library's database/sql and Drivers
+
+The Go standard library's `sql` package will be the most familiar plugin system to Go developers, and is definitive way of using package specific interfaces with Go.
+
+- Types defined in intermediate package (`database/sql`)
+- Drivers register themselves via a package `init()` using the package's `Register`
+- User code includes the driver using an unnamed `import`
+
+Notably: since types are statically defined, driver signatures are validated at build time.
+
+* Standard Library's database/sql (cont'd)
+
+A driver implementation registers itself, satisfying the interfaces, and returning types defined in the intermediate (`database/sql/driver`) package:
+
+    package mydriver // example.com/mydriver
+    import (
+        "database/sql"
+        "database/sql/driver"
+    )
+    func init() {
+        sql.Register("mydriver", Driver{})
+    }
+    
+    // Driver provides a sql/driver.Driver implementation.
+    type Driver struct { /* ... */ }
+    func (d Driver) Open(name string) (driver.Conn, error) { return NewConn(name) }
+    
+    // Conn provides a sql/driver.Conn implementation.    
+    type Conn struct {/* ... */ }
+    func NewConn(name string) (driver.Conn, error) { return &Conn{name: name}, nil }
+    func (conn *Conn) Prepare(query string) (driver.Stmt, error) { /* ... */ }
+    func (conn *Conn) Close() error { /* ... */ }
+    func (conn *Conn) Begin() (driver.Tx, error) { /* ... */ }
+
+* Standard Library's database/sql (cont'd)
+
+User code can then use the standard SQL interfaces, and import whichever database driver they need:
+
+    // user code
+    import (
+        "database/sql"
+        _ "example.com/mydriver"
+    )
+    
+    db, err := sql.Open("driver", "localhost")
+    if err != nil { /* ... */ }
+    if err := db.Exec("my query"); err != nil { /* ... */ }
+
+* logrus
+
+The widely used [[https://github.com/sirupsen/logrus][`github.com/sirupsen/logrus`]] logging package provides a way to add "hooks" dynamically. A hook in `logrus` will provide a different storage backend for logs.
+
+`logrus`'s hooks are similar, but different in concept in a key, fundamental way to the standard `database/sql` package. Specifically, a `logrus` user is responsible for creating the hook and passing configuration parameters, and then registering the hook with the `logrus` package.
+
+Additionally, `logrus`'s hooks are more simple and don't require additional, implementing intermediate types.
+
+* logrus (cont'd)
+
+A `logrus` hook implementation will look like the following:
+
+    package myhook // example.com/myhook
+    import (
+        "github.com/sirupsen/logrus"
+    )
+    
+    type MyHook struct { /* ... */ }
+    func NewMyHook(opts ...string) *MyHook { return &MyHook{} }
+    
+    // Interface satisfiers.
+    func (h *MyHook) Levels() []logrus.Level { /* ... */ }
+    func (h *MyHook) Fire(*logrus.Entry) error { /* ... */ }
+
+* logrus (cont'd)
+
+User code wishing to use that hook will look like the following:
+
+    import (
+        "github.com/sirupsen/logrus"
+        "example.com/myhook"
+    )
+
+    func main() {
+        logger := logrus.New()
+        logger.Hooks.Add(myhook.NewMyHook("option a"))
+    }
+
+* usql
+
+`usql` is a all-in-one tool designed to provide a `psql`-like command-line interface for databases. `usql` takes a different approach to plugins, since goal of `usql` is to expose all of the Go community provided database drivers into a easy-to-use tool.
+
+Unlike `logrus`, or `database/sql` (which intends for users extend functionality via inclusion of third-party packages/repositories), `usql` is meant to be distributed as a packaged executable, or to be installable/buildable using `go`install` / `go`build`.
+
+Since much of the functionality that `usql` uses from the `sql` drivers can be stubbed (or provide default implementations for) and because logic needs to be dynamic based on the driver being used, `usql` uses a "registered options" style plugin system. 
+
+That is, in `usql` every driver plugin is defined using a single, shared `struct` type whose members change how `usql` uses the underlying driver. This style is statically verified at build, and eliminates shared interfaces or reflection/introspection on registered drivers.
+
+* usql (cont'd)
+
+The high-level `usql/drivers.Driver` type:
+
+    type Driver struct {
+        // AllowDollar enables query buffers to have dollar ($$) style strings.
+        AllowDollar bool
+
+        // Err (when provided) is responsible for converting the underlying
+        // driver's error, and returing the error's code and message.
+        Err func(error) (string, string)
+        
+        /* ... */
+    }
+
+This plugin style allows the mixing of options (`AllowDollar` in this case) and functionality (`Err` here), without needing to fallback to using the `reflect` package (which would require complicated tag introspection) or dynamic `.(type)` assertions on registered drivers.
+
+* usql (cont'd)
+
+A driver for `usql` will register the `drivers.Driver` type in the following manner:
+
+    package mydriver // github.com/xo/usql/drivers/mydriver
+
+    import (
+        "example.com/mydriver"
+        "github.com/xo/usql/drivers"
+    )
+
+    func init() {
+        drivers.Register("mydriver", drivers.Driver{
+            AllowDollar: false,
+            Err: func(err error) (string, string) {
+                var e mydriver.Error
+                if errors.As(err, &e) {
+                    return e.Code, e.Message
+                }
+                return "", err.Error()
+            },
+        })
+    }
+
+
+* usql (cont'd)
+
+Then, in the actual `usql` application, (the equivalent of) the following is done:
+
+    import "github.com/xo/usql/drivers"
+
+    var drivers = map[string]drivers.Driver{} // global variable, populated by drivers.Register
+
+    func main() {
+        d := drivers["mydriver"]
+        if d.AllowDollar {
+            // special code for dollar quoted strings
+        }
+        if err := DoSomething(d); err != nil {
+            var code, message string
+            if d.Err != nil {
+                code, message = d.Err(err)
+            } else {
+                code, message = "", err.Error()
+            }
+            log.Printf("error: %s %s", code, message)
+        }
+    }
+
+* usql (cont'd)
+
+An additional goal of `usql` was to be able to dynamically include (via build tags) drivers depending on the target operating system (as some drivers are only available on Windows).
+
+And, in `usql` each `sql` driver has its own package namespace on the `usql/drivers/<DRIVER>` path to group together additional package code, and to associate build tags with the driver:
+
+    // +build mydriver
+
+The drivers then can be dynamically included in the build in `usql` when passing `-tags` to `go`install` or `go`build`:
+
+    $ go install -tags mydriver github.com/xo/usql
+
+* Kubernetes
+
+Many users of K8s are familiar with `CustomResourceDefinitions` (CRDs), which has the ability to define a `Controller` that listens for events. Events are shared through HTTP, with the parent delegating functionality to the child.
+
+- Processes can be on the same host, or distributed
+- Communication is done via pipe or TCP/IP socket
+- Events are delegated via gRPC (over HTTP) from the K8s API server (parent) to the Controller client (child)
+
+* Kubernetes (cont'd)
+
+Kubernetes CRD controller plugin has other, notable aspects:
+
+- Plugins can be written in any language, simply needing to implement provided gRPC interfaces
+- Built to static API specification
+- Meant to be backward/forward compatible with the K8s API server
+- Can be dynamically changed/updated at runtime
+- Server (parent) can be changed while the client (child) remains operational!
+
+* Thanks!
+
+.background ../gopher-gojakarta.png
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions!
+
+Especially Senior + Junior:
+
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- QA
+
+And, of course:
+
+- Product, Project, and Engineering Managers
+- Sales and Marketing
+- Solution Architects
+- Business Analysts
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background ../gopher-brankas-hiring.png
