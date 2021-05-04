@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kenshaw/go-jakarta/03-web-frameworks/src/models"
+	"github.com/go-jakarta/slides/03-web-frameworks/src/models"
 	_ "github.com/mattn/go-sqlite3"
 )
 

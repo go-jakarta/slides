@@ -15,9 +15,9 @@ import (
 	"strings"
 
 	"github.com/NYTimes/gziphandler"
-	"github.com/brankas/goji"
-	"github.com/brankas/sentinel"
 	"github.com/gorilla/csrf"
+	"github.com/kenshaw/goji"
+	"github.com/kenshaw/sentinel"
 	_ "github.com/lib/pq"
 	"github.com/xo/dburl"
 )

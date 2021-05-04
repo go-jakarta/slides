@@ -4,53 +4,31 @@ import (
 	"context"
 	"log"
 
-	cdp "github.com/knq/chromedp"
+	"github.com/chromedp/chromedp"
 )
 
 func main() {
-	var err error
-
-	// create context
-	ctxt, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	// create chrome instance
-	c, err := cdp.New(ctxt, cdp.WithLog(log.Printf))
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
 	// run tasks
 	var res string
-	err = c.Run(ctxt, googleSearch("site:brank.as", &res))
+	err := chromedp.Run(ctx, googleSearch("site:brank.as", &res))
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// shutdown chrome
-	err = c.Shutdown(ctxt)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// wait for chrome to finish
-	err = c.Wait()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	log.Printf("first search result: %s", res)
 }
 
-func googleSearch(q string, res *string) cdp.Tasks {
+func googleSearch(q string, res *string) chromedp.Tasks {
 	if res == nil {
 		panic("res cannot be nil")
 	}
-	return cdp.Tasks{
-		cdp.Navigate(`https://www.google.com`),
-		cdp.WaitVisible(`#hplogo`, cdp.ByID),
-		cdp.SendKeys(`#lst-ib`, q+"\n", cdp.ByID),
-		cdp.WaitVisible(`#res`, cdp.ByID),
-		cdp.Text(`#res div.rc:nth-child(1)`, res),
+	return chromedp.Tasks{
+		chromedp.Navigate(`https://www.google.com`),
+		chromedp.WaitVisible(`#hplogo`, chromedp.ByID),
+		chromedp.SendKeys(`#lst-ib`, q+"\n", chromedp.ByID),
+		chromedp.WaitVisible(`#res`, chromedp.ByID),
+		chromedp.Text(`#res div.rc:nth-child(1)`, res),
 	}
 }

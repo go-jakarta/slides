@@ -7,12 +7,11 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	pb "gophers.id/slides/16-grpc/src"
+	pb "github.com/go-jakarta/slides/16-grpc/src"
 )
 
 // START OMIT
-type myhandler struct {
-}
+type myhandler struct{}
 
 func (h *myhandler) Echo(ctx context.Context, msg *pb.EchoMessage) (*pb.EchoMessage, error) {
 	return msg, nil

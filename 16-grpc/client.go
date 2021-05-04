@@ -6,7 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	pb "gophers.id/slides/16-grpc/src"
+	pb "github.com/go-jakarta/slides/16-grpc/src"
 )
 
 func main() {

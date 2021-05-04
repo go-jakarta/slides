@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kenshaw/go-jakarta/03-web-frameworks/src/models"
+	"github.com/go-jakarta/slides/03-web-frameworks/src/models"
 	_ "github.com/mattn/go-sqlite3"
 	"goji.io"
 	"goji.io/pat"

@@ -55,7 +55,7 @@ func StreamLayoutPage(qw422016 *qt422016.Writer, p Page, req *http.Request) {
 //line layout.html:9
 	qw422016.N().S(Asset(`css/app.css`))
 //line layout.html:9
-	qw422016.N().S(`"></head><body><nav class="navbar navbar-expand-lg navbar-dark bg-primary"><a class=navbar-brand href=/ >Search IMDb</a> <button class=navbar-toggler type=button data-toggle=collapse data-target=#navbarColor01 aria-controls=navbarColor01 aria-expanded=false aria-label="Toggle navigation"><span class=navbar-toggler-icon></span></button><div class="collapse navbar-collapse" id=navbarColor01><ul class="navbar-nav mr-auto"><li class="nav-item active"><a class=nav-link href=/ >Search <span class=sr-only>(current)</span></a></li></ul><ul class="nav navbar-nav ml-auto"><li class=nav-item><a class=nav-link href=https://gophers.id/slides target=_blank>GitHub</a></li></ul></div></nav>`)
+	qw422016.N().S(`"></head><body><nav class="navbar navbar-expand-lg navbar-dark bg-primary"><a class=navbar-brand href=/ >Search IMDb</a> <button class=navbar-toggler type=button data-toggle=collapse data-target=#navbarColor01 aria-controls=navbarColor01 aria-expanded=false aria-label="Toggle navigation"><span class=navbar-toggler-icon></span></button><div class="collapse navbar-collapse" id=navbarColor01><ul class="navbar-nav mr-auto"><li class="nav-item active"><a class=nav-link href=/ >Search <span class=sr-only>(current)</span></a></li></ul><ul class="nav navbar-nav ml-auto"><li class=nav-item><a class=nav-link href=https://github.com/go-jakarta/slides target=_blank>GitHub</a></li></ul></div></nav>`)
 //line layout.html:9
 	p.StreamContent(qw422016)
 //line layout.html:9

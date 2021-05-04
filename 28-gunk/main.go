@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	pb "gophers.id/slides/28-gunk/v1/util"
+	pb "github.com/go-jakarta/slides/28-gunk/v1/util"
 )
 
 // Server is a util server.

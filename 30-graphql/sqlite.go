@@ -8,10 +8,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/brankas/goji"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/introspection"
 	"github.com/graph-gophers/graphql-go/relay"
+	"github.com/kenshaw/goji"
 	_ "modernc.org/sqlite"
 )
 

@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/xo/dburl"
-	"gophers.id/slides/22-aks/webapp/services"
+	"github.com/go-jakarta/slides/22-aks/webapp/services"
 )
 
 var (

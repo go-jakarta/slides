@@ -2,13 +2,10 @@ package main
 
 // import the grpc service definitions
 import (
-	pb "github.com/kenshaw/go-jakarta/02-gomobile-and-grpc/src"
-)
-
-import (
 	"fmt"
 	"log"
 
+	pb "github.com/go-jakarta/slides/02-gomobile-and-grpc/src"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )

@@ -7,7 +7,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	pb "github.com/kenshaw/go-jakarta/02-gomobile-and-grpc/src"
+	pb "github.com/go-jakarta/slides/02-gomobile-and-grpc/src"
 )
 
 // A wrapper type to expose via gomobile.

@@ -9,7 +9,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 
-	pb "github.com/kenshaw/go-jakarta/05-rest-to-grpc/src"
+	pb "github.com/go-jakarta/slides/05-rest-to-grpc/src"
 )
 
 func main() {

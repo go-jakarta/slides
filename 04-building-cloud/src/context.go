@@ -12,15 +12,15 @@ import (
 	redis "gopkg.in/redis.v2"
 
 	fcm "github.com/NaySoftware/go-fcm"
-	"github.com/Sirupsen/logrus"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/cskr/pubsub"
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/s3"
 	"github.com/goamz/goamz/sqs"
-	"github.com/knq/firebase"
-	"github.com/knq/jwt"
-	"github.com/knq/sdhook"
+	"github.com/golang/groupcache"
+	"github.com/kenshaw/jwt"
+	"github.com/kenshaw/sdhook"
+	"github.com/sirupsen/logrus"
 	ses "github.com/sourcegraph/go-ses"
 
 	bigquery "github.com/dailyburn/bigquery/client"
@@ -84,11 +84,11 @@ func sqlExample() {
 }
 
 func firebaseExample() {
-	db, err := firebase.NewDatabaseRef( /* ... */ )
-	r := db.Ref("path/to/something")
-	id, err := r.Push(map[string]interface{}{
-		"my_field": 15,
-	})
+	//	db, err := firebase.NewDatabaseRef( /* ... */ )
+	//	r := db.Ref("path/to/something")
+	//	id, err := r.Push(map[string]interface{}{
+	//		"my_field": 15,
+	//	})
 }
 
 func bigqueryExample() {

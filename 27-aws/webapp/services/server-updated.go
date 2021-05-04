@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/brankas/goji"
+	"github.com/kenshaw/goji"
 
-	"gophers.id/slides/27-aws/webapp/models"
+	"github.com/go-jakarta/slides/27-aws/webapp/models"
 )
 
 type Server struct {

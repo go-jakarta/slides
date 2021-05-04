@@ -10,12 +10,11 @@ import (
 	goog "github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 
-	pb "gophers.id/slides/23-gunk/v1/util"
+	pb "github.com/go-jakarta/slides/23-gunk/v1/util"
 )
 
 // Server is a util server.
-type Server struct {
-}
+type Server struct{}
 
 // CheckStatus returns the status of the util server.
 func (s *Server) CheckStatus(ctxt context.Context, req *goog.Empty) (*pb.CheckStatusResponse, error) {

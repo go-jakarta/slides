@@ -2,7 +2,7 @@ package main
 
 // import the hello.proto grpc service definitions
 import (
-	pb "github.com/kenshaw/go-jakarta/02-gomobile-and-grpc/src"
+	pb "github.com/go-jakarta/slides/02-gomobile-and-grpc/src"
 )
 
 import (

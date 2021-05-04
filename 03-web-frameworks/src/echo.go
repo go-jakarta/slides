@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kenshaw/go-jakarta/03-web-frameworks/src/models"
+	"github.com/go-jakarta/slides/03-web-frameworks/src/models"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"

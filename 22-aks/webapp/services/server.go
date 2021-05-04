@@ -11,7 +11,7 @@ import (
 	goji "goji.io"
 	"goji.io/pat"
 
-	"gophers.id/slides/22-aks/webapp/models"
+	"github.com/go-jakarta/slides/22-aks/webapp/models"
 )
 
 type Server struct {
