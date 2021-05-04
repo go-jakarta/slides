@@ -1,0 +1,107 @@
+Realtime Data Visualization with Go (in 3d)!
+GoJakarta
+
+Kenneth Shaw
+ken@brank.as
+
+5 May 2021
+
+Tags: go, golang, realtime, 3d, visualization, analytics, aws
+
+* Plugin Patterns with Go
+
+.background ../gopher-gojakarta.png
+
+* First...
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]]
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+
+    $ go get -u gophers.id/slides
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us:
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Vidya Winda Sari
+
+- [[mailto:vidya.winda@gmail.com][vidya.winda@gmail.com]]
+- [[tel:+62-821-2498-8430][+62-821-2498-8430]]
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions!
+
+Especially Senior and Junior:
+
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- QA
+
+And, of course looking for all other positions:
+
+- Product, Project, and Engineering Managers
+- Sales and Marketing
+- Solution Architects
+- Business Analysts
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background ../gopher-brankas-hiring.png
+
+* Slides
+
+Slides are available online!
+
+    $ go get -u gophers.id/slides
+
+* Realtime Data Visualization with Go (in 3d)!
+
+.background ../gopher-gojakarta.png
+
+* Configure AWS queue
+
+Create SQS (Simple Queue Service):
+
+    aws 
+
+* Thanks!
+
+.background ../gopher-gojakarta.png
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions!
+
+Especially Senior + Junior:
+
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- QA
+
+And, of course:
+
+- Product, Project, and Engineering Managers
+- Sales and Marketing
+- Solution Architects
+- Business Analysts
+
+Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as]]
+
+.background ../gopher-brankas-hiring.png
