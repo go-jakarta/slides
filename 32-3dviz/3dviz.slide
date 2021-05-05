@@ -8,7 +8,7 @@ ken@brank.as
 
 Tags: go, golang, realtime, 3d, visualization, analytics, aws
 
-* Plugin Patterns with Go
+* Realtime Data Visualization with Go (in 3d)!
 
 .background ../gopher-gojakarta.png
 
@@ -75,11 +75,41 @@ Slides are available online!
 
 .background ../gopher-gojakarta.png
 
-* Configure AWS queue
+* Overview
 
-Create SQS (Simple Queue Service):
+Built (hacked together) a quick demo, showcasing an eclectic assortment of Go packages. The goal tonight is to give a feel for what can be done with Go in a very short period of time, and to detail how the Go community has come into its own, offering a wide, diverse arsenal of packages. 
 
-    aws 
+There really is no limit to what one can achieve with Go, and almost always Go allows one to do it more expediently, in a more sane way that almost any other programming language available.
+
+* The App
+
+Today's presentation is very different from the kind of applications that are usually shared with GoJakarta. Apologies if the code isn't as refined as previous presentations.
+
+Today, we're going to showcase a realtime, 3d data visualization application.
+
+Consists of 2 parts:
+
+- A simple HTTP `server` that serves a web API returning the user's GeoIP information (Country, Latitude, Longitude, H3). Information is streamed to AWS' SQS
+- A simple `viz` app that draws a 3d globe (streamed from AWS' SQS)
+
+Additionally, there is 1 auxiliary piece:
+
+- A `tester` app that sends random IPs to to the GeoIP server, to hit the API 
+
+* Quick Demo
+
+.image 3dviz.png
+
+* Package Overview
+
+Notable packages used:
+
+- `github.com/uber/h3-go/v3` - Go bindings for Uber's H3 package, their heirarchial geocoding library
+- `github.com/oschwald/maxminddb-golang` - A pure Go version of the Maxmind library, the defacto standard for geolocating IPs
+- `github.com/g3n/engine` - A budding 3d engine written in Go, with a wide array of advanced features and functionality
+- `github.com/aws/aws-sdk-go` - AWS' Go SDK, allowing full use of AWS' APIs from Go
+
+* Code Tour
 
 * Thanks!
 
