@@ -24,9 +24,9 @@ Please join the us online if you're not yet a member!
 
 GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
 
-Slides available at [[https://gophers.id/slides][gophers.id/slides]]:
+Slides available at [[https://github.com/go-jakarta/slides][github.com/go-jakarta/slides]]:
 
-    $ go get -u gophers.id/slides
+    $ git clone https://github.com/go-jakarta/slides.git
 
 * Presenters + Contact
 
@@ -69,7 +69,7 @@ Please email a CV / cover letter to: [[mailto:careers@brank.as][careers@brank.as
 
 Slides are available online!
 
-    $ go get -u gophers.id/slides
+    $ git clone https://github.com/go-jakarta/slides.git
 
 * Realtime Data Visualization with Go (in 3d)!
 
