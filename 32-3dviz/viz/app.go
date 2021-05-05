@@ -102,6 +102,9 @@ func (g *App) run(ctx context.Context) error {
 			}
 		}
 	}()
+	// coordinate check for korea
+	// x := h3.ToParent(h3.FromString("8430e1dffffffff"), g.v.res)
+	// g.hexMap[x].mat.SetOpacity(1.0)
 	g.a.Run(func(renderer *renderer.Renderer, deltaTime time.Duration) {
 		g.a.Gls().Clear(gls.DEPTH_BUFFER_BIT | gls.STENCIL_BUFFER_BIT | gls.COLOR_BUFFER_BIT)
 		rotation := 0.02 * float32(deltaTime.Seconds())
@@ -126,7 +129,6 @@ func (g *App) addSkyboxAndLights() error {
 	dirLight := light.NewDirectional(&math32.Color{1, 1, 1}, 0.9)
 	dirLight.SetPosition(0, 0, 100)
 	g.scene.Add(dirLight)
-	return nil
 	// skybox
 	skybox, err := graphic.NewSkybox(graphic.SkyboxData{
 		filepath.Join(g.wd, "viz", "images", "dark-s_"), "jpg",
@@ -146,6 +148,8 @@ func (g *App) addEarth() error {
 	}
 	geom := geometry.NewSphere(0.99, 32, 16)
 	g.earth = graphic.NewMesh(geom, mat)
+	g.earth.RotateY(math32.DegToRad(105))
+	g.earth.RotateZ(math32.DegToRad(-2))
 	g.scene.Add(g.earth)
 	return nil
 }
