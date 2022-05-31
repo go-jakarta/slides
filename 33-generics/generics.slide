@@ -1,0 +1,268 @@
+Go Generics
+GoJakarta
+
+Kenneth Shaw
+ken@brankas.com
+
+31 May 2022
+
+Tags: go, golang, generics
+
+* Go Generics
+
+.background ../gopher-gojakarta.png
+
+* First...
+
+A special thanks to AWS for hosting tonight!
+
+Please join the us online if you're not yet a member!
+
+- Meetup: [[https://www.meetup.com/GoJakarta][meetup.com/GoJakarta]]
+- Telegram: [[https://t.me/gophers_id][t.me/gophers_id]]
+- Facebook: [[https://www.facebook.com/groups/GophersID][facebook.com/groups/GophersID]]
+
+* About GoJakarta
+
+GoJakarta is a monthly meetup focused on the Go programming language, but also incorporates other topics related to Go such as deploying Go apps to the cloud.
+
+Slides available at [[https://github.com/go-jakarta/slides][github.com/go-jakarta/slides]]:
+
+    $ git clone https://github.com/go-jakarta/slides.git
+
+* Presenters + Contact
+
+Looking for presenters! We need presenters! If you would like to do a presentation, have a suggestion for a topic, or have a location we can use!
+
+Contact us:
+
+Ken Shaw
+
+- [[mailto:kenshaw@gmail.com][kenshaw@gmail.com]]
+- [[tel:+62-811-168-1586][+62-811-168-1586]]
+
+Vidya Winda Sari
+
+- [[mailto:vidya.winda@gmail.com][vidya.winda@gmail.com]]
+- [[tel:+62-821-2498-8430][+62-821-2498-8430]]
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions!
+
+Especially Senior and Junior:
+
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- QA
+
+And, of course looking for all other positions:
+
+- Product, Project, and Engineering Managers
+- Sales and Marketing
+- Solution Architects
+- Business Analysts
+
+Please email a CV / cover letter to: [[mailto:careers@brankas.com][careers@brankas.com]]
+
+.background ../gopher-brankas-hiring.png
+
+* Slides
+
+Slides are available online!
+
+    $ git clone https://github.com/go-jakarta/slides.git
+
+* Go Generics
+
+.background ../gopher-gojakarta.png
+
+* Background
+
+Go has added generics with the latest major (`1.18`) release!
+
+- Provides "final" missing component to the language as requested by many
+- Allows code reuse while still maintaining strong type safety and compile time checks and, in certain applications, can be more performant
+
+Useful in different programming applications:
+
+- Data Structures, Algorithms, Containers
+- Design Patterns
+- Reusable code libraries
+- Map/Reduce
+- Dependency Injection
+- Monads
+- More!
+
+* Overview
+
+Generics are how typed programming languages, such as Go, are able to reuse code across multiple, different types, without needing to redeclare/cast/convert or modify a variable. 
+
+- Syntax is similar to C++ and Java's declaration syntax, but uses `[]`
+
+    func MyFunc[T int | uint](a T, b T) T { /* ... */ }
+    type MyType[T AnotherType] []T
+    type MyStruct[T any] struct { item T }
+
+Constraints can be used to create reusable "types of types":
+
+    type MyConstraint interface {
+        int | uint8 | Number
+    }
+
+    func AnotherFunc[T MyConstraint](a T, b T) { /* ... */ }
+
+* Overview (cont'd)
+
+Generics allows using the same block of code across different types:
+
+.code simple.go
+
+* Generic Type Interfaces
+
+.code combined.go
+
+* Type Inference in Generics and Tilde Symbol
+
+.code combined_tilde.go
+
+* Reusing Constraints
+
+The `golang.org/x/exp/constraints` package defines common constraints that will likely (at some point) put into the standard library:
+
+    import "golang.org/x/exp/constraints"
+    
+    var complex constraints.Complex     // any complex type -- ~complex64 | ~complex128
+    var float constraints.Float         // any floating point type -- ~float32 | ~float64
+    var ordered constraints.Ordered     // any orderable type -- constraints.Integer | constraints.Float | ~string
+    var signed constraints.Signed       // any signed type -- ~int | ~int8 | ~int16 | ~int32 | ~int64
+    var unsigned constraints.Unsigned   // any unsigned type -- ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
+    var integer constraints.Integer     // any integer type -- constraints.Signed | constraints.Unsigned
+
+* Putting it Together
+
+.code table.go /type Table/,/END/
+
+* Putting it Together (cont'd)
+
+.code table.go /func main/,/^}/
+
+Output:
+
+    "table1" (int): 35
+    "table2" (float64): 40.5
+
+* Interface and Struct Constraints
+
+.code table2.go /func Sum/,/END/
+
+* Interface and Struct Constraints (cont'd)
+
+.code table2.go /END/,
+
+* Interface and Struct Constraints (cont'd)
+
+Output:
+
+    ledger1 (float64): 6
+    ledger2 (int): -6
+
+* Ecosystem
+
+Although Go's generics are fairly new, there's a fairly robust set of packages and libraries that provide reusable, out-of-the-box implementations:
+
+- [[https://golang.org/x/exp][golang.org/x/exp]] - The Go experimental packages (likely to be merged into the standard library)
+- [[https://github.com/samber/lo][github.com/samber/lo]] - A lodash-style Go library
+- [[https://github.com/samber/mo][github.com/samber/mo]] - Monads for Go
+- [[https://github.com/zyedidia/generic][github.com/zyedidia/generic]] - Generic data structures
+
+* Ecosystem - golang.org/x/exp/slices
+
+The `golang.org/x/exp/slices` package is likely to be merged into the standard library, and provides very handy, common slice utilities:
+
+    func BinarySearch(x []E, target E) (int, bool) // performs a binary search on x, searching for target
+    func BinarySearchFunc(x []E, target E, cmp func(E, E) int) (int, bool) // performs binary search, doing comparison with cmp
+    func Clip(s S) S // clip removes unused capacity from slice
+    func Clone(s S) S // clones the slice
+    func Compact(s S) S // compacts the slice
+    func CompactFunc(s S, eq func(E, E) bool) S // compacts the slice using eq to determine equivalency
+    func Compare(s1, s2 []E) int // compares s1 and s2
+    func CompareFunc(s1 []E1, s2 []E2, cmp func(E1, E2) int) int // compares s1 and s2 using cmp foc equivalency
+    func Contains(s []E, v E) bool // determines if v is in s
+    func Delete(s S, i, j int) S // deletes s[i:j], returning the modified slice
+    func Equal(s1, s2 []E) bool // determines if s1, s2 are equal
+    func EqualFunc(s1 []E1, s2 []E2, eq func(E1, E2) bool) bool // determines if s1, s2 are equal using eq for equivalency
+    func Grow(s S, n int) S // grows s capacity by n
+    func Index(s []E, v E) int // returns the index of v in s
+    func IndexFunc(s []E, f func(E) bool) int // returns the index in s where f is true
+    func Insert(s S, i int, v ...E) S // inserts v into s at i
+    func IsSorted(x []E) bool // determines if x is sorted
+    func IsSortedFunc(x []E, less func(a, b E) bool) bool // determines if x is sorted, using less to determine if elements are in order
+    func Sort(x []E) // sorts x
+    func SortFunc(x []E, less func(a, b E) bool) // sorts x using less to determine order
+    func SortStableFunc(x []E, less func(a, b E) bool) // stable sorts x, using less
+
+* Ecosystem - golang.org/x/exp/maps
+
+The `golang.org/x/exp/maps` package is likely to be merged into the standard library, and provides very handy, common map utilities:
+
+    func Clear(m M) // removes all entries from m
+    func Clone(m M) M // clones m
+    func Copy(dst, src M) // copies all key/value pairs from src to dst
+    func DeleteFunc(m M, del func(K, V) bool) // deletes any key/value pairs where del returns true
+    func Equal(m1 M1, m2 M2) bool // determines if m1 and m2 are equal
+    func EqualFunc(m1 M1, m2 M2, eq func(V1, V2) bool) bool // determines if m1 and m2's values are equaly using eq
+    func Keys(m M) []K // returns the keys of m
+    func Values(m M) []V // returns the values of m
+
+* Ecosystem - github.com/samber/mo
+
+The `github.com/samber/mo` package has some common monad types/patterns:
+
+    type Future
+    type Option
+    type State
+    type Task
+
+* Ecosystem - github.com/makiuchi-d/linq/v2
+
+The `github.com/makiuchi-d/linq/v2` package has .NET style LINQ functionality:
+
+.code linq.go /^type/,
+
+* Ecosystem - github.com/makiuchi-d/linq/v2 (cont'd)
+
+Output:
+
+    1136 three
+    559 two
+
+* Other Go Generic Packages
+
+- `github.com/samber/lo` - lo-dash style programming utilities, such as Async, Filter, Map/Reduce, Sample, and many many others!
+- `github.com/zyedidia/generic` - common generic data structures (B-Tree, Cache, Hashmap, Double Linked List, Stack, Trie, Heap, Queue, ...)
+
+* Thanks!
+
+.background ../gopher-gojakarta.png
+
+* Brankas is Hiring!
+
+Brankas is hiring for all positions!
+
+Especially Senior + Junior:
+
+- Backend/Frontend Engineers
+- Platform and Site Reliability Engineers
+- QA
+
+And, of course:
+
+- Product, Project, and Engineering Managers
+- Sales and Marketing
+- Solution Architects
+- Business Analysts
+
+Please email a CV / cover letter to: [[mailto:careers@brankas.com][careers@brankas.com]]
+
+.background ../gopher-brankas-hiring.png

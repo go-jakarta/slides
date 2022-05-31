@@ -1,0 +1,4 @@
+github.com/makiuchi-d/linq/v2 v2.0.0 h1:J/W0Vf705wcHGEBCSxteS3a1xe/ovfsPIYCL8QuW8RM=
+github.com/makiuchi-d/linq/v2 v2.0.0/go.mod h1:9BRCug23JiTYCzSAl07yJDiEF/ASOUU7UDPHweM41Z4=
+golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf h1:oXVg4h2qJDd9htKxb5SCpFBHLipW6hXmL3qpUixS2jw=
+golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf/go.mod h1:yh0Ynu2b5ZUe3MQfp2nM0ecK7wsgouWTDN0FNeJuIys=
